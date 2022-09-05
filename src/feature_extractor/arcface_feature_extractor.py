@@ -12,7 +12,9 @@ def execute(image_path_list):
 
     # ref: https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch#model-zoo
     model.load_state_dict(torch.load(
-        'models/backbone_r100.pth', map_location=device))
+        # 'models/backbone_ms1mv3_r100.pth',
+        'models/backbone_glint360k_r100.pth',
+        map_location=device))
 
     model.eval()
     image_tensor_list = list()
@@ -34,4 +36,5 @@ def execute(image_path_list):
         processed_feat = [elem.item() for elem in feat_list[i]]
         ret_processed_feat_list.append(np.array(processed_feat))
 
+    # print(feat_list[0].shape)
     return ret_processed_feat_list
