@@ -15,7 +15,6 @@ def execute(image_path_list):
         'models/backbone_r100.pth', map_location=device))
 
     model.eval()
-    # image_path_list = glob.glob("only_face_data/*.*")
     image_tensor_list = list()
     for image_path in image_path_list:
         image = Image.open(image_path)
@@ -26,13 +25,13 @@ def execute(image_path_list):
         image_tensor = torch.unsqueeze(image_tensor, 0)
         image_tensor_list.append(image_tensor)
 
-    torch_cat_mage_tensor = torch.cat(image_tensor_list, 0)
-    outputs = model(torch_cat_mage_tensor)
-    feat_list = outputs
+    torch_cat_image_tensor = torch.cat(image_tensor_list, 0)
+    output_list = model(torch_cat_image_tensor)
+    feat_list = output_list
 
-    ret_processed_feats = list()
+    ret_processed_feat_list = list()
     for i in range(len(feat_list)):
         processed_feat = [elem.item() for elem in feat_list[i]]
-        ret_processed_feats.append(np.array(processed_feat))
+        ret_processed_feat_list.append(np.array(processed_feat))
 
-    return ret_processed_feats
+    return ret_processed_feat_list

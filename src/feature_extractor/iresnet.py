@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#ref: https://github.com/deepinsight/insightface/blob/master/recognition/arcface_torch/backbones/iresnet.py
+# ref: https://github.com/deepinsight/insightface/blob/master/recognition/arcface_torch/backbones/iresnet.py
 import torch
 from torch import nn
 from torch.utils.checkpoint import checkpoint
