@@ -34,8 +34,6 @@ def vis_arcface():
             #       cos_sim_value)
             plot_value_list.append(cos_sim_value)
 
-        left = np.array(np.array(range(len(image_path_list))))
-        height = np.array(plot_value_list)
         # FigureとAxesを作成
         _, ax = plt.subplots()
         plt.gca().get_xaxis().set_major_locator(ticker.MaxNLocator(integer=True))
@@ -43,7 +41,13 @@ def vis_arcface():
         ax.set_ylabel("cosine similarity")
 
         # Axesに縦棒グラフを追加
-        ax.bar(left, height, width=0.9, align="center")
+        left = np.array(np.array(range(len(image_path_list))))
+        height = np.array(plot_value_list)
+        ax.bar(left, height, width=0.9, align="center", color="blue")
+
+        only_anchor_left = np.array(anchor_id)
+        only_anchor_height = np.array(plot_value_list[anchor_id])
+        ax.bar(only_anchor_left, only_anchor_height, width=0.9, align="center", color="red")
 
         # plt.show()
         plt.savefig("vis_graph/anchor" + str(anchor_id) + ".png")
