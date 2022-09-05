@@ -12,8 +12,8 @@ def cos_sim(v1, v2):
 
 
 def vis_arcface():
-    image_path_list = glob.glob("raw_data/*.*")
-    # image_path_list = glob.glob("only_face_data/*.*")
+    # image_path_list = glob.glob("raw_data/*.*")
+    image_path_list = glob.glob("only_face_data/*.*")
     processed_feat_list = arcface_feature_extractor.execute(image_path_list)
 
     if not os.path.exists("vis_graph"):
