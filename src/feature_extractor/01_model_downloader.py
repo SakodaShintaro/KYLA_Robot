@@ -10,7 +10,7 @@ if __name__ == "__main__":
         ref: https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch#model-zoo
     """
     model_url_map = {
-        "backbone_ms1mv3_r100.pth": "https://public.dm.files.1drv.com/y4m5xWt2ySHE0aN_KdKC1zkadNUZYIX0GdEDegZCsEHWE2g8qJ3eN2BYm3_emPrxdZIxvItGKh-S2NdG9wuwqzC2TVWwKwnl2kFpfDHeNmzf7QVTKYBgEFfzaUFyzw9LEsecWfOZEQGVfn6HCPYPhCpn6tw29-6mu9tzFKn8epr0_Nlvya5vP5l2KtcBkXUW8iNMM1gMgqwgW7uDN5-czIbEw8BfhQtW9lsjDSJ6X9p0Jo",
+        "backbone_ms1mv3_r100.pth": "https://public.dm.files.1drv.com/y4mdGS_Y4S3UAGiB9iQ8v_vU2qUuz7_cyjkf1fvtdz9ccg6rn87MrMHQf2JN-M0IA_OL0nUpI9MZBua6OEqycVe0LzWULWrdhURy1DabnjU5PAf660VZNImNMzjTQA81p02QG6IflaqRkT2hCaiv1T05mXBV-WIhd_kX9TpcCBEhQfQQBa6nBh6c3MV05vvusCOIqbA5m-IgZpWZ53DqR5KsjMQhTElK5t8UMt7fKTx23Y",
         "backbone_glint360k_r100.pth": "https://public.dm.files.1drv.com/y4mfmVZXbM3nTaxhhjX9uL-lJTNsXNygeIYuGHL-_n9YqM25w702aCyu1HwHQLwmASP9HyLxC4E8adl2kEDMx36RZqWGx7HfZyXLf6Lt9zBlk-EfLOms70DJGJs3CUKCgjQ9coqC6c9g7MNoL_i5aGW9e4D1J-pU4jOxxXKjUcqYabJeXJI2FdxDVJwayy8PqSc_qTmdj1vMbqon_eaTb9XVpWRLk2pUPvJcDoyz4dUHH0"
     }
 

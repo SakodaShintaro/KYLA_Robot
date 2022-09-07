@@ -30,6 +30,9 @@ if __name__ == "__main__":
             image_rows, image_cols, _ = image.shape
             for detection in results.detections:
                 location = detection.location_data
+                keypoint_list = location.relative_keypoints
+                # print([(kp.x, kp.y) for kp in keypoint_list])  # face's key-points
+
                 relative_bounding_box = location.relative_bounding_box
                 rect_start_point = mp_drawing._normalized_to_pixel_coordinates(
                     relative_bounding_box.xmin, relative_bounding_box.ymin, image_cols,

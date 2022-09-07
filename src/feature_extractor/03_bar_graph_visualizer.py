@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import normal_feature_extractor
 import arcface_feature_extractor
 import glob
 import os
@@ -14,6 +15,8 @@ def cos_sim(v1, v2):
 def vis_arcface():
     # image_path_list = glob.glob("raw_data/*.*")
     image_path_list = glob.glob("only_face_data/*.*")
+
+    # processed_feat_list = normal_feature_extractor.execute(image_path_list)
     processed_feat_list = arcface_feature_extractor.execute(image_path_list)
 
     if not os.path.exists("vis_graph"):

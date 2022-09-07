@@ -12,11 +12,12 @@ def execute(image_path_list):
 
     # ref: https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch#model-zoo
     model.load_state_dict(torch.load(
-        # 'models/backbone_ms1mv3_r100.pth',
-        'models/backbone_glint360k_r100.pth',
+        'models/backbone_ms1mv3_r100.pth',
+        # 'models/backbone_glint360k_r100.pth',
         map_location=device))
 
     model.eval()
+    model.to('cpu')
     image_tensor_list = list()
     for image_path in image_path_list:
         image = Image.open(image_path)
@@ -28,8 +29,7 @@ def execute(image_path_list):
         image_tensor_list.append(image_tensor)
 
     torch_cat_image_tensor = torch.cat(image_tensor_list, 0)
-    output_list = model(torch_cat_image_tensor)
-    feat_list = output_list
+    feat_list = model(torch_cat_image_tensor)
 
     ret_processed_feat_list = list()
     for i in range(len(feat_list)):
