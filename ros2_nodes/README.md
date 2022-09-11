@@ -7,6 +7,10 @@ ROS2には
 
 という3種類のデータ通信の方式がある。
 
+参考文献) 布留川 英一『Unityではじめる ROS・人工知能 ロボットプログラミング実践入門』
+
+https://www.borndigital.co.jp/book/26553.html
+
 ## ワークスペースの作り方
 ```bash
 cd ros2_nodes
