@@ -10,6 +10,7 @@ if __name__ == "__main__":
     mp_face_detection = mp.solutions.face_detection
     mp_drawing = mp.solutions.drawing_utils
     image_path_list = glob.glob("raw_data/*.*")
+    image_path_list = sorted(image_path_list)
 
     if not os.path.exists("only_face_data"):
         os.mkdir("only_face_data")
