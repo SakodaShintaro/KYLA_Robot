@@ -33,3 +33,8 @@ colcon build
 source ~/.bashrc
 ros2 run hello hello_node
 ```
+
+## 導入したPythonパッケージ
+```bash
+pip3 install opencv-python
+```
