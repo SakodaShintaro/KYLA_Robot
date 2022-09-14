@@ -37,4 +37,8 @@ ros2 run hello hello_node
 ## 導入したPythonパッケージ
 ```bash
 pip3 install opencv-python
+pip3 install tqdm
+pip3 install clint
+pip3 install mediapipe
+pip3 install timm
 ```
