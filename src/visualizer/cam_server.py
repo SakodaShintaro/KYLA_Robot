@@ -1,55 +1,56 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- 
+# ref: https://gist.github.com/kittinan/e7ecefddda5616eab2765fdb2affed1b
 import cv2
-import json
+import io
 import socket
 import struct
-from base_server import BaseServer
+import time
+import pickle
+import zlib
+import time
+import numpy as np
 
-class CamServer(BaseServer):
+class CamServer(object):
     def __init__(self):
-        super().__init__()
-        self.cap = cv2.VideoCapture(0)
-        self.frame_id = 0
+        self.client_socket_for_face_det = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket_for_face_det.connect(('localhost', 64850))
+        # self.connection = self.client_socket_for_face_det.makefile('wb')
+        self.client_socket_for_vis = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket_for_vis.connect(('localhost', 64851))
 
-        # # setting server ---
-        # self.face_det_port_id = 50501
-        # self.face_det_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # self.face_det_socket.bind(("localhost", self.face_det_port_id))  # IPとポート番号を指定します
-        # self.face_det_socket.listen(5)
-        # self.face_det_buffer_size = 1024
-        # # ---
+        # video_file = "./face_mesh_input.mp4"
+        # cam = cv2.VideoCapture(video_file)
+        self.cam = cv2.VideoCapture(0)
 
-        # to face_det_server ---
-        self.face_det_port_id = 50502
-        self.face_det_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.face_det_socket.settimeout(0.1)    # タイムアウト値設定を追加する
-        self.face_det_socket.connect(("localhost", self.face_det_port_id))
-        self.face_det_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        # self.face_det_buffer_size = 1024
-        # ---
+        self.fps = self.cam.get(cv2.CAP_PROP_FPS)
+        # print(self.fps)
+        self.img_counter = 0
+        self.encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
 
-    def update(self):
-        ret, image = self.cap.read()
-        if not ret:
-            return
+    def execute(self):
+        while self.cam.isOpened():
+            ret, frame = self.cam.read()
+            if not ret:
+                continue
+            # frame = np.array(frame, dtype=np.uint8)
+            ret, frame = cv2.imencode('.jpg', frame, self.encode_param)
+            #    data = zlib.compress(pickle.dumps(frame, 0))
+            size_of_frame = frame.shape[0]
+            print("{}: {}".format(self.img_counter, size_of_frame))
+            # client_socket.sendall(struct.pack(">L", size_of_data) + data)
 
-        self.frame_id += 1
+            # 決まったサイズでヘッダーをつけて、受け取り側でペイロードの大きさが分かるようにする。
+            constant_sized_header = struct.pack(">L", size_of_frame) 
+            self.client_socket_for_face_det.sendall(constant_sized_header + frame.tostring())
+            self.client_socket_for_vis.sendall(constant_sized_header + frame.tostring())
+            # client_socket.sendall(frame)
+            self.img_counter += 1
+            # time.sleep(1.0 / fps)
 
-        # send image-info to face_det_server ---
-        fmt = "d"
-        send_data1 = struct.pack(fmt, self.frame_id)
-        self.face_det_socket.send(send_data1)
-        send_data2 = struct.pack(fmt, image.shape[1])  # width
-        self.face_det_socket.send(send_data2)
-        send_data3 = struct.pack(fmt, image.shape[0])  # height
-        self.face_det_socket.send(send_data3)
-        send_data4 = image.tostring()
-        self.face_det_socket.send(send_data4)
-        # ---
-
-        self.face_det_socket.close()
-
+        self.client_socket_for_face_det.close()
+        self.cam.release()
 
 if __name__ == "__main__":
     cam_server = CamServer()
     cam_server.execute()
+
