@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # ref: https://gist.github.com/kittinan/e7ecefddda5616eab2765fdb2affed1b
-from msilib.schema import Feature
 import socket
 import sys
 import cv2
@@ -15,15 +14,16 @@ import mediapipe as mp
 class FaceDetServer(object):
     def __init__(self):
         self.host = 'localhost'
-        self.port = 64850
+        self.port_for_receiving_from_cam = 64850
         self.buffer_size = 4096 * 4
         self.queue_size = 10
         self.fresh_image = None
         self.bbox_list = list()
         self.stop_threads = False
 
+        self.port_for_sending_to_vis = 64852
         self.client_socket_for_vis = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket_for_vis.connect(('localhost', 64852))
+        self.client_socket_for_vis.connect(('localhost', self.port_for_sending_to_vis))
 
     def __update_face_bbox_list(self):
         while not self.stop_threads:
@@ -103,7 +103,7 @@ class FaceDetServer(object):
         face_det_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print('Socket created')
 
-        face_det_socket.bind((self.host, self.port))
+        face_det_socket.bind((self.host, self.port_for_receiving_from_cam))
         print('Socket bind complete')
         face_det_socket.listen(self.queue_size)
         print('Socket now listening')

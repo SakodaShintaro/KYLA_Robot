@@ -12,11 +12,14 @@ import numpy as np
 
 class CamServer(object):
     def __init__(self):
+        self.port_for_sending_to_face_det = 64850
         self.client_socket_for_face_det = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket_for_face_det.connect(('localhost', 64850))
+        self.client_socket_for_face_det.connect(('localhost', self.port_for_sending_to_face_det))
         # self.connection = self.client_socket_for_face_det.makefile('wb')
+
+        self.port_for_sending_to_vis = 64851
         self.client_socket_for_vis = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket_for_vis.connect(('localhost', 64851))
+        self.client_socket_for_vis.connect(('localhost', self.port_for_sending_to_vis))
 
         # video_file = "./face_mesh_input.mp4"
         # cam = cv2.VideoCapture(video_file)
@@ -40,9 +43,10 @@ class CamServer(object):
             # client_socket.sendall(struct.pack(">L", size_of_data) + data)
 
             # 決まったサイズでヘッダーをつけて、受け取り側でペイロードの大きさが分かるようにする。
-            constant_sized_header = struct.pack(">L", size_of_frame) 
-            self.client_socket_for_face_det.sendall(constant_sized_header + frame.tostring())
-            self.client_socket_for_vis.sendall(constant_sized_header + frame.tostring())
+            constant_sized_header = struct.pack(">L", size_of_frame)
+            frame_data = frame.tobytes()  # ndarray から純粋なバイト列に変換
+            self.client_socket_for_face_det.sendall(constant_sized_header + frame_data)
+            self.client_socket_for_vis.sendall(constant_sized_header + frame_data)
             # client_socket.sendall(frame)
             self.img_counter += 1
             # time.sleep(1.0 / fps)

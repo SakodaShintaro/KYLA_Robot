@@ -15,8 +15,8 @@ import mediapipe as mp
 class VisServer(object):
     def __init__(self):
         self.host = 'localhost'
-        self.port_for_cam = 64851
-        self.port_for_face_det = 64852
+        self.port_for_receiving_from_cam = 64851
+        self.port_for_receiving_from_face_det = 64852
         self.buffer_size = 4096 * 4
         self.queue_size = 10
         self.image = None
@@ -26,7 +26,7 @@ class VisServer(object):
     def __update_cam_image(self):
         vis_socket_for_cam = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print('Socket created (cam_server)')
-        vis_socket_for_cam.bind((self.host, self.port_for_cam))
+        vis_socket_for_cam.bind((self.host, self.port_for_receiving_from_cam))
         print('Socket bind complete (cam_server)')
         vis_socket_for_cam.listen(self.queue_size)
         print('Socket now listening (cam_server)')
@@ -55,30 +55,15 @@ class VisServer(object):
             image = np.fromstring(frame_data, dtype=np.uint8)
             image = cv2.imdecode(image, cv2.IMREAD_COLOR)
 
-            # self.fresh_image は face-detection が完了すると None になり、以下で更新される。
-            # なので、face-detection には常に新鮮な画像が入力される。
             self.image = image.copy()
 
-            # print(self.bbox_list)    
-            # for arr_id, bbox in enumerate(self.bbox_list):
-            #     sx, sy, ex, ey = bbox
-            #     color = (255, 255, 0)
-            #     thickness = 2
-            #     cv2.rectangle(frame, (sx, sy), (ex, ey), color, thickness)
-            #     cv2.putText(frame, "face_id: " + str(arr_id), (sx, sy - 15), 1, 1.5, color, thickness)
-            # cv2.imshow('ImageWindow', image)
-            # key = cv2.waitKey(1)
-            # if key == 27:
-            #     cv2.destroyAllWindows()
-            #     # self.stop_threads = True
-            #     break
         vis_socket_for_cam.close()
 
 
     def __update_face_bbox_list(self):
         vis_socket_for_face_det = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print('Socket created (face_det_server)')
-        vis_socket_for_face_det.bind((self.host, self.port_for_face_det))
+        vis_socket_for_face_det.bind((self.host, self.port_for_receiving_from_face_det))
         print('Socket bind complete (face_det_server)')
         vis_socket_for_face_det.listen(self.queue_size)
         print('Socket now listening (face_det_server)')
