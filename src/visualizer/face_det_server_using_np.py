@@ -20,9 +20,10 @@ class FaceDetServer(object):
         self.queue_size = 10
         self.fresh_image = None
         self.bbox_list = list()
+        self.stop_threads = False
 
     def __update_face_bbox_list(self):
-        while True:
+        while not self.stop_threads:
             if self.fresh_image is None:
                 continue
 
@@ -83,15 +84,15 @@ class FaceDetServer(object):
         th = threading.Thread(target=self.__update_face_bbox_list)
         th.start()
 
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        face_det_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print('Socket created')
 
-        s.bind((self.host, self.port))
+        face_det_socket.bind((self.host, self.port))
         print('Socket bind complete')
-        s.listen(self.queue_size)
+        face_det_socket.listen(self.queue_size)
         print('Socket now listening')
 
-        conn, addr = s.accept()
+        conn, addr = face_det_socket.accept()
 
         data = b""
         header_size = struct.calcsize(">L")
@@ -123,12 +124,18 @@ class FaceDetServer(object):
             print(self.bbox_list)    
             for arr_id, bbox in enumerate(self.bbox_list):
                 sx, sy, ex, ey = bbox
-                color = (255, 255, 255)
+                color = (255, 255, 0)
                 thickness = 2
                 cv2.rectangle(frame, (sx, sy), (ex, ey), color, thickness)
-                cv2.putText(frame, "face_id: " + str(arr_id), (sx, sy - 15), 1, 2.0, color, thickness)
+                cv2.putText(frame, "face_id: " + str(arr_id), (sx, sy - 15), 1, 1.5, color, thickness)
             cv2.imshow('ImageWindow', frame)
-            cv2.waitKey(1)
+            key = cv2.waitKey(1)
+            if key == 27:
+                cv2.destroyAllWindows()
+                self.stop_threads = True
+                break
+
+        face_det_socket.close()
 
 
 if __name__ == "__main__":

@@ -10,40 +10,44 @@ import zlib
 import time
 import numpy as np
 
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.connect(('localhost', 64850))
-connection = client_socket.makefile('wb')
+class CamServer(object):
+    def __init__(self):
+        self.client_socket_for_face_det = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket_for_face_det.connect(('localhost', 64850))
+        self.connection = self.client_socket_for_face_det.makefile('wb')
 
-# video_file = "./face_mesh_input.mp4"
-# cam = cv2.VideoCapture(video_file)
-cam = cv2.VideoCapture(0)
+        # video_file = "./face_mesh_input.mp4"
+        # cam = cv2.VideoCapture(video_file)
+        self.cam = cv2.VideoCapture(0)
 
-# cam.set(3, 320);
-# cam.set(4, 240);
-fps = cam.get(cv2.CAP_PROP_FPS)
-print(fps)
+        self.fps = self.cam.get(cv2.CAP_PROP_FPS)
+        # print(self.fps)
+        self.img_counter = 0
+        self.encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
 
-img_counter = 0
+    def execute(self):
+        while self.cam.isOpened():
+            ret, frame = self.cam.read()
+            if not ret:
+                continue
+            # frame = np.array(frame, dtype=np.uint8)
+            ret, frame = cv2.imencode('.jpg', frame, self.encode_param)
+            #    data = zlib.compress(pickle.dumps(frame, 0))
+            size_of_frame = frame.shape[0]
+            print("{}: {}".format(self.img_counter, size_of_frame))
+            # client_socket.sendall(struct.pack(">L", size_of_data) + data)
 
-encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
+            # 決まったサイズでヘッダーをつけて、受け取り側でペイロードの大きさが分かるようにする。
+            constant_sized_header = struct.pack(">L", size_of_frame) 
+            self.client_socket_for_face_det.sendall(constant_sized_header + frame.tostring())
+            # client_socket.sendall(frame)
+            self.img_counter += 1
+            # time.sleep(1.0 / fps)
 
-while cam.isOpened():
-    ret, frame = cam.read()
-    if not ret:
-        continue
-    # frame = np.array(frame, dtype=np.uint8)
-    result, frame = cv2.imencode('.jpg', frame, encode_param)
-#    data = zlib.compress(pickle.dumps(frame, 0))
-    size_of_frame = frame.shape[0]
+        self.client_socket_for_face_det.close()
+        self.cam.release()
 
-    print("{}: {}".format(img_counter, size_of_frame))
-    # client_socket.sendall(struct.pack(">L", size_of_data) + data)
+if __name__ == "__main__":
+    cam_server = CamServer()
+    cam_server.execute()
 
-    # 決まったサイズでヘッダーをつけて、受け取り側でペイロードの大きさが分かるようにする。
-    constant_sized_header = struct.pack(">L", size_of_frame) 
-    client_socket.sendall(constant_sized_header + frame.tostring())
-    # client_socket.sendall(frame)
-    img_counter += 1
-    # time.sleep(1.0 / fps)
-
-cam.release()
