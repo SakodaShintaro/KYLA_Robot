@@ -63,6 +63,7 @@ class VisServer(object):
             image = cv2.imdecode(image, cv2.IMREAD_COLOR)
             self.image = image.copy()
 
+        # 止めるときはキルするので下記は実行されない。
         self.vis_socket_for_cam.close()
 
     def __update_face_bbox_list(self):
@@ -90,6 +91,7 @@ class VisServer(object):
             self.bbox_list = pickle.loads(
                 frame_data, fix_imports=True, encoding="bytes")
 
+        # 止めるときはキルするので下記は実行されない。
         self.vis_socket_for_face_det.close()
 
     def execute(self):

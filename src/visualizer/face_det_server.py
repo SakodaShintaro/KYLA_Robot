@@ -60,6 +60,7 @@ class FaceDetServer(object):
             image = cv2.imdecode(image, cv2.IMREAD_COLOR)
             self.fresh_image = image.copy()
 
+        # 止めるときはキルするので下記は実行されない。
         self.vis_socket_for_cam.close()
 
     def __update_face_bbox_list(self):
@@ -131,6 +132,7 @@ class FaceDetServer(object):
                 self.bbox_list = list()
                 print(e)
 
+        # 止めるときはキルするので下記は実行されない。
         self.client_socket_for_vis.close()
 
     def execute(self):
