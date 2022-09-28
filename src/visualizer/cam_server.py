@@ -37,13 +37,13 @@ class CamServer(object):
             # 決まったサイズでヘッダーをつけて、受け取り側でペイロードの大きさが分かるようにする。
             # ref: https://gist.github.com/kittinan/e7ecefddda5616eab2765fdb2affed1b
             constant_sized_header = struct.pack(">L", size_of_image)  # ビックエンディアンで 4byte のサイズ変数を作る
-            frame_data = image.tobytes()  # ndarray から純粋なバイト列に変換
+            image_bytes = image.tobytes()  # ndarray から純粋なバイト列に変換
 
             # ヘッダーをつけてバイト列を送信
             self.client_socket_for_face_det.sendall(
-                constant_sized_header + frame_data)
+                constant_sized_header + image_bytes)
             self.client_socket_for_vis.sendall(
-                constant_sized_header + frame_data)
+                constant_sized_header + image_bytes)
             # time.sleep(1.0 / fps)
 
         # 止めるときはキルするので下記は実行されない。

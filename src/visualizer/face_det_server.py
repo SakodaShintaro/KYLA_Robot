@@ -54,7 +54,7 @@ class FaceDetServer(object):
                 recv_data = conn_for_cam.recv(self.buffer_size)
                 data += recv_data
             image_bytes = data[:payload_size]
-            data = data[payload_size:]  # リセット
+            data = data[payload_size:]  # 先頭位置をずらす
 
             image = np.frombuffer(image_bytes, dtype=np.uint8)
             image = cv2.imdecode(image, cv2.IMREAD_COLOR)
@@ -125,12 +125,12 @@ class FaceDetServer(object):
 
                         # 処理が終わったタイミングで vis_server へ送信
                         # ref: https://gist.github.com/kittinan/e7ecefddda5616eab2765fdb2affed1b
-                        data = pickle.dumps(self.bbox_list, 0)
-                        size_of_bbox_list = len(data)
+                        bbox_list_bytes = pickle.dumps(self.bbox_list, 0)
+                        size_of_bbox_list = len(bbox_list_bytes)
                         constant_sized_header = struct.pack(
                             ">L", size_of_bbox_list)  # ビックエンディアンで 4byte のサイズ変数を作る
                         self.client_socket_for_vis.sendall(
-                            constant_sized_header + data)
+                            constant_sized_header + bbox_list_bytes)
                     else:
                         print("result.detections is Nothing.")
                     self.fresh_image = None  # 顔検出が終わったら None にする。

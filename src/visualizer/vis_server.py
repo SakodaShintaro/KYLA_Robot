@@ -57,7 +57,7 @@ class VisServer(object):
                 recv_data = conn_for_cam.recv(self.buffer_size)
                 data += recv_data
             image_bytes = data[:payload_size]
-            data = data[payload_size:]  # リセット
+            data = data[payload_size:]  # 先頭位置をずらす
 
             image = np.frombuffer(image_bytes, dtype=np.uint8)
             image = cv2.imdecode(image, cv2.IMREAD_COLOR)
@@ -87,7 +87,7 @@ class VisServer(object):
                 recv_data = conn_for_face_det.recv(self.buffer_size)
                 data += recv_data
             bbox_list_bytes = data[:payload_size]
-            data = data[payload_size:]  # リセット
+            data = data[payload_size:]  # 先頭位置をずらす
             self.bbox_list = pickle.loads(
                 bbox_list_bytes, fix_imports=True, encoding="bytes")
 
