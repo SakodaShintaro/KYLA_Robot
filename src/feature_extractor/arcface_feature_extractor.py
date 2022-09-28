@@ -7,17 +7,16 @@ import numpy as np
 
 
 def execute(image_path_list):
-    device = torch.device('cpu')
+    device = torch.device('cuda')
     model = iresnet100(pretrained=False)
 
     # ref: https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch#model-zoo
     model.load_state_dict(torch.load(
-        'models/backbone_ms1mv3_r100.pth',
-        # 'models/backbone_glint360k_r100.pth',
+        '../models/backbone.pth',
         map_location=device))
 
     model.eval()
-    model.to('cpu')
+    model.to(device)
     image_tensor_list = list()
     for image_path in image_path_list:
         image = Image.open(image_path)
@@ -29,6 +28,7 @@ def execute(image_path_list):
         image_tensor_list.append(image_tensor)
 
     torch_cat_image_tensor = torch.cat(image_tensor_list, 0)
+    torch_cat_image_tensor = torch_cat_image_tensor.to(device)
     feat_list = model(torch_cat_image_tensor)
 
     ret_processed_feat_list = list()
