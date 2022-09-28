@@ -1,0 +1,5 @@
+opencv-python
+tqdm
+clint
+mediapipe
+timm

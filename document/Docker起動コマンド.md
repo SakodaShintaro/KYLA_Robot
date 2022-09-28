@@ -14,4 +14,5 @@ http://127.0.0.1:6080/
 pipを入れる
 ```bash
 sudo apt install python3-pip
+pip3 install -r requirements.txt
 ```
