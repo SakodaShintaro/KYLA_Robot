@@ -1,5 +1,6 @@
 ## Overview
-顔認証ロボット（仮）の PoC 用のソフトウェア
+- 顔認証ロボット（仮）の PoC 用のソフトウェア
+- [関連資料１](https://docs.google.com/presentation/d/1wpX4qXXii1_PgITi_xa0ZiD9NF6hWEXO1vijqhnpF4Y/edit?usp=sharing)
 
 ## Start Visualizer
 ```
