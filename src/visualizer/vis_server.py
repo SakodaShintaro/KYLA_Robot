@@ -56,10 +56,10 @@ class VisServer(object):
             while len(data) < payload_size:
                 recv_data = conn_for_cam.recv(self.buffer_size)
                 data += recv_data
-            frame_data = data[:payload_size]
+            image_bytes = data[:payload_size]
             data = data[payload_size:]  # リセット
 
-            image = np.frombuffer(frame_data, dtype=np.uint8)
+            image = np.frombuffer(image_bytes, dtype=np.uint8)
             image = cv2.imdecode(image, cv2.IMREAD_COLOR)
             self.image = image.copy()
 
@@ -86,10 +86,10 @@ class VisServer(object):
             while len(data) < payload_size:
                 recv_data = conn_for_face_det.recv(self.buffer_size)
                 data += recv_data
-            frame_data = data[:payload_size]
+            bbox_list_bytes = data[:payload_size]
             data = data[payload_size:]  # リセット
             self.bbox_list = pickle.loads(
-                frame_data, fix_imports=True, encoding="bytes")
+                bbox_list_bytes, fix_imports=True, encoding="bytes")
 
         # 止めるときはキルするので下記は実行されない。
         self.vis_socket_for_face_det.close()
