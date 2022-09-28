@@ -39,6 +39,7 @@ class FaceDetServer(object):
         data = b""
         header_size = struct.calcsize(">L")
         while True:
+            # ヘッダーをまず読み取って、画像データのサイズを調べる
             while len(data) < header_size:
                 data += conn_for_cam.recv(self.buffer_size)
 
@@ -46,9 +47,8 @@ class FaceDetServer(object):
             payload_size = constant_sized_header
             data = data[header_size:]  # header 以降がペイロード（の一部。全部拾えてない事があるので）
             msg_size = struct.unpack(">L", payload_size)[0]
-            # この時点ではヘッダーは拾えているが、ペイロードはまだ受け取れていない。
 
-            # ペイロードを少しずつ受け取る。
+            # 画像サイズ分だけペイロードを少しずつ受け取る。
             # ref: https://gist.github.com/kittinan/e7ecefddda5616eab2765fdb2affed1b
             while len(data) < msg_size:
                 recv_data = conn_for_cam.recv(self.buffer_size)
@@ -56,7 +56,7 @@ class FaceDetServer(object):
             frame_data = data[:msg_size]
             data = data[msg_size:]  # リセット
 
-            image = np.fromstring(frame_data, dtype=np.uint8)
+            image = np.frombuffer(frame_data, dtype=np.uint8)
             image = cv2.imdecode(image, cv2.IMREAD_COLOR)
             self.fresh_image = image.copy()
 
@@ -66,10 +66,12 @@ class FaceDetServer(object):
     def __update_face_bbox_list(self):
         # face_det_cnt = 0
         while True:
+            # 別スレッドでの画像取得が終わるまでは None なので飛ばす。
             if self.fresh_image is None:
                 print("fresh_image is None.")
                 continue
 
+            # 新鮮な画像が取れたら顔検出する。
             enable_expand_roi = True
             try:
                 mp_face_detection = mp.solutions.face_detection
@@ -122,10 +124,9 @@ class FaceDetServer(object):
                         size = len(data)
                         self.client_socket_for_vis.sendall(
                             struct.pack(">L", size) + data)
-                        self.fresh_image = None
                     else:
-                        self.fresh_image = None
                         print("result.detections is Nothing.")
+                    self.fresh_image = None  # 顔検出が終わったら None にする。
 
             except Exception as e:
                 self.fresh_image = None

@@ -42,6 +42,7 @@ class VisServer(object):
         data = b""
         header_size = struct.calcsize(">L")
         while True:
+            # ヘッダーをまず読み取って、画像データのサイズを調べる
             while len(data) < header_size:
                 data += conn_for_cam.recv(self.buffer_size)
 
@@ -49,9 +50,8 @@ class VisServer(object):
             payload_size = constant_sized_header
             data = data[header_size:]  # header 以降がペイロード（の一部。全部拾えてない事があるので）
             msg_size = struct.unpack(">L", payload_size)[0]
-            # この時点ではヘッダーは拾えているが、ペイロードはまだ受け取れていない。
 
-            # ペイロードを少しずつ受け取る。
+            # 画像サイズ分だけペイロードを少しずつ受け取る。
             # ref: https://gist.github.com/kittinan/e7ecefddda5616eab2765fdb2affed1b
             while len(data) < msg_size:
                 recv_data = conn_for_cam.recv(self.buffer_size)
@@ -59,7 +59,7 @@ class VisServer(object):
             frame_data = data[:msg_size]
             data = data[msg_size:]  # リセット
 
-            image = np.fromstring(frame_data, dtype=np.uint8)
+            image = np.frombuffer(frame_data, dtype=np.uint8)
             image = cv2.imdecode(image, cv2.IMREAD_COLOR)
             self.image = image.copy()
 
@@ -72,6 +72,7 @@ class VisServer(object):
         data = b""
         header_size = struct.calcsize(">L")
         while True:
+            # ヘッダーをまず読み取って、画像データのサイズを調べる
             while len(data) < header_size:
                 data += conn_for_face_det.recv(self.buffer_size)
 
@@ -79,9 +80,8 @@ class VisServer(object):
             payload_size = constant_sized_header
             data = data[header_size:]  # header 以降がペイロード（の一部。全部拾えてない事があるので）
             msg_size = struct.unpack(">L", payload_size)[0]
-            # この時点ではヘッダーは拾えているが、ペイロードはまだ受け取れていない。
 
-            # ペイロードを少しずつ受け取る。
+            # 画像サイズ分だけペイロードを少しずつ受け取る。
             # ref: https://gist.github.com/kittinan/e7ecefddda5616eab2765fdb2affed1b
             while len(data) < msg_size:
                 recv_data = conn_for_face_det.recv(self.buffer_size)

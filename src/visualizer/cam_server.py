@@ -30,7 +30,7 @@ class CamServer(object):
             ret, frame = self.cap.read()
             if not ret:
                 continue
-            ret, frame = cv2.imencode(".jpg", frame, self.encode_param)
+            ret, frame = cv2.imencode(".jpg", frame, self.encode_param)  # np.array (dim1) へ変換
             size_of_frame = frame.shape[0]
             # print("{}: {}".format(size_of_frame))
 
