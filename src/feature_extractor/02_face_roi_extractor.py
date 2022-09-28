@@ -12,8 +12,8 @@ if __name__ == "__main__":
     image_path_list = glob.glob("raw_data/*.*")
     image_path_list = sorted(image_path_list)
 
-    if not os.path.exists("only_face_data"):
-        os.mkdir("only_face_data")
+    save_dir = "only_face_data"
+    os.makedirs(save_dir, exist_ok=True)
 
     with mp_face_detection.FaceDetection(
             model_selection=1, min_detection_confidence=0.5) as face_detection:
@@ -59,4 +59,4 @@ if __name__ == "__main__":
                 break  # 一個しかないので抜ける
 
             file_basename = os.path.basename(file)
-            cv2.imwrite('only_face_data/' + file_basename, roi_image)
+            cv2.imwrite(f'{save_dir}/{file_basename}', roi_image)
