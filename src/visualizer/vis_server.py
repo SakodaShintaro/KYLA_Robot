@@ -47,17 +47,17 @@ class VisServer(object):
                 data += conn_for_cam.recv(self.buffer_size)
 
             constant_sized_header = data[:header_size]
-            payload_size = constant_sized_header
+            payload_size_bytes = constant_sized_header
             data = data[header_size:]  # header 以降がペイロード（の一部。全部拾えてない事があるので）
-            msg_size = struct.unpack(">L", payload_size)[0]
+            payload_size = struct.unpack(">L", payload_size_bytes)[0]
 
             # 画像サイズ分だけペイロードを少しずつ受け取る。
             # ref: https://gist.github.com/kittinan/e7ecefddda5616eab2765fdb2affed1b
-            while len(data) < msg_size:
+            while len(data) < payload_size:
                 recv_data = conn_for_cam.recv(self.buffer_size)
                 data += recv_data
-            frame_data = data[:msg_size]
-            data = data[msg_size:]  # リセット
+            frame_data = data[:payload_size]
+            data = data[payload_size:]  # リセット
 
             image = np.frombuffer(frame_data, dtype=np.uint8)
             image = cv2.imdecode(image, cv2.IMREAD_COLOR)
@@ -77,17 +77,17 @@ class VisServer(object):
                 data += conn_for_face_det.recv(self.buffer_size)
 
             constant_sized_header = data[:header_size]
-            payload_size = constant_sized_header
+            payload_size_bytes = constant_sized_header
             data = data[header_size:]  # header 以降がペイロード（の一部。全部拾えてない事があるので）
-            msg_size = struct.unpack(">L", payload_size)[0]
+            payload_size = struct.unpack(">L", payload_size_bytes)[0]
 
             # 画像サイズ分だけペイロードを少しずつ受け取る。
             # ref: https://gist.github.com/kittinan/e7ecefddda5616eab2765fdb2affed1b
-            while len(data) < msg_size:
+            while len(data) < payload_size:
                 recv_data = conn_for_face_det.recv(self.buffer_size)
                 data += recv_data
-            frame_data = data[:msg_size]
-            data = data[msg_size:]  # リセット
+            frame_data = data[:payload_size]
+            data = data[payload_size:]  # リセット
             self.bbox_list = pickle.loads(
                 frame_data, fix_imports=True, encoding="bytes")
 

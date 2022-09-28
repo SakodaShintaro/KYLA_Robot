@@ -27,17 +27,17 @@ class CamServer(object):
 
     def execute(self):
         while self.cap.isOpened():
-            ret, frame = self.cap.read()
+            ret, image = self.cap.read()
             if not ret:
                 continue
-            ret, frame = cv2.imencode(".jpg", frame, self.encode_param)  # np.array (dim1) へ変換
-            size_of_frame = frame.shape[0]
+            ret, image = cv2.imencode(".jpg", image, self.encode_param)  # np.array (dim1) へ変換
+            size_of_frame = image.shape[0]
             # print("{}: {}".format(size_of_frame))
 
             # 決まったサイズでヘッダーをつけて、受け取り側でペイロードの大きさが分かるようにする。
             # ref: https://gist.github.com/kittinan/e7ecefddda5616eab2765fdb2affed1b
             constant_sized_header = struct.pack(">L", size_of_frame)  # ビックエンディアンで 4byte のサイズ変数を作る
-            frame_data = frame.tobytes()  # ndarray から純粋なバイト列に変換
+            frame_data = image.tobytes()  # ndarray から純粋なバイト列に変換
 
             # ヘッダーをつけてバイト列を送信
             self.client_socket_for_face_det.sendall(
