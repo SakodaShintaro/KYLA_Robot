@@ -15,8 +15,7 @@ if __name__ == "__main__":
     }
 
     out_dir = "./models/"
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir, exist_ok=True)
+    os.makedirs(out_dir, exist_ok=True)
 
     for model_path, model_url in tqdm.tqdm(model_url_map.items()):
         urlData = requests.get(model_url, stream=True)
