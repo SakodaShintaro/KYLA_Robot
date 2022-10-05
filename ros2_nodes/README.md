@@ -34,6 +34,11 @@ source ~/.bashrc
 ros2 run hello hello_node
 ```
 
+## publishした画像を確認する方法
+```bash
+ros2 run rqt_image_view rqt_image_view
+```
+
 ## 導入したPythonパッケージ
 ```bash
 pip3 install opencv-python
