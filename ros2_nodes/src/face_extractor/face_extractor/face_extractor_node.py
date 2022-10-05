@@ -12,7 +12,7 @@ class MySubscriberNode(Node):
 
     def on_subscribe(self, msg):
         bridge = CvBridge()
-        img = bridge.imgmsg_to_cv2(msg)
+        img = bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
         cv2.imwrite("qwe.png", img)
         self.get_logger().info(f"Subscribe image")
 

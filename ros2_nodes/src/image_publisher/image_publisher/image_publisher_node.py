@@ -19,7 +19,7 @@ class ImagePublisherNode(Node):
         curr_image_path = self.image_path_list[self.index]
         curr_image = cv2.imread(curr_image_path)
         bridge = CvBridge()
-        msg = bridge.cv2_to_imgmsg(curr_image)
+        msg = bridge.cv2_to_imgmsg(curr_image, encoding="bgr8")
         self.index += 1
         self.index %= len(self.image_path_list)
         self.publisher.publish(msg)
