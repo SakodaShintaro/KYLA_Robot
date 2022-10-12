@@ -54,6 +54,11 @@ class FaceExtractor:
                 ex = max(0, min(image_cols, ex))
                 sy = max(0, min(image_rows, sy))
                 ey = max(0, min(image_rows, ey))
+            
+            sx /= image_cols
+            sy /= image_rows
+            ex /= image_cols
+            ey /= image_rows
 
             result.append([sx, sy, ex, ey])
 
