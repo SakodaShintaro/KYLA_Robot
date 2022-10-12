@@ -13,9 +13,7 @@ class FaceExtractor:
         self.face_defector_ = mp_face_detection.FaceDetection(
             model_selection=1, min_detection_confidence=0.5)
         self.mp_drawing_ = mp.solutions.drawing_utils
-
         self.enable_expand_roi_ = enable_expand_roi
-        pass
 
     def execute(self, image: np.array) -> List[List[float]]:
         # Convert the BGR image to RGB and process it with MediaPipe Face Detection.
