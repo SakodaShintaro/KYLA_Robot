@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # ref: https://gist.github.com/kittinan/e7ecefddda5616eab2765fdb2affed1b
-from msilib.schema import Feature
 import socket
 import sys
 import cv2
