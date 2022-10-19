@@ -8,6 +8,9 @@ if __name__ == "__main__":
     vis_proc = subprocess.Popen(
         ['python', 'vis_server.py'], stdout=devnull, stderr=devnull)
 
+    reid_proc = subprocess.Popen(
+        ['python', 'face_reid_server.py'], stdout=devnull, stderr=devnull)
+
     face_det_proc = subprocess.Popen(
         ['python', 'face_det_server.py'], stdout=devnull, stderr=devnull)
 
@@ -21,6 +24,7 @@ if __name__ == "__main__":
         key_val = input()
         if key_val == "q":
             vis_proc.kill()
+            reid_proc.kill()
             face_det_proc.kill()
             cam_proc.kill()
             break

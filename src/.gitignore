@@ -2,3 +2,6 @@
 only_face_data/
 vis_graph/
 models/
+/**/*.png
+/**/*.jpg
+/**/*.jpeg

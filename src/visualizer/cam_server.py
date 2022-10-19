@@ -19,6 +19,12 @@ class CamServer(object):
         self.client_socket_for_vis.connect(
             (self.host, self.port_for_sending_to_vis))
 
+        self.port_for_sending_to_reid = 64854
+        self.client_socket_for_reid = socket.socket(
+            socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket_for_reid.connect(
+            (self.host, self.port_for_sending_to_reid))
+
         self.cap = cv2.VideoCapture(0)
 
         self.fps = self.cap.get(cv2.CAP_PROP_FPS)
@@ -44,11 +50,14 @@ class CamServer(object):
                 constant_sized_header + image_bytes)
             self.client_socket_for_vis.sendall(
                 constant_sized_header + image_bytes)
+            self.client_socket_for_reid.sendall(
+                constant_sized_header + image_bytes)
             # time.sleep(1.0 / fps)
 
         # 止めるときはキルするので下記は実行されない。
         self.client_socket_for_face_det.close()
         self.client_socket_for_vis.close()
+        self.client_socket_for_reid.close()
         self.cap.release()
 
 

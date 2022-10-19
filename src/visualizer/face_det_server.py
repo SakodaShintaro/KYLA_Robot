@@ -31,6 +31,12 @@ class FaceDetServer(object):
         self.client_socket_for_vis.connect(
             (self.host, self.port_for_sending_to_vis))
 
+        self.port_for_sending_bbox_list_to_reid = 64855
+        self.client_socket_for_vis2 = socket.socket(
+            socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket_for_vis2.connect(
+            (self.host, self.port_for_sending_bbox_list_to_reid))
+
         print('Setting Sockets')
 
     def __update_cam_image(self):
@@ -70,6 +76,8 @@ class FaceDetServer(object):
             if self.fresh_image is None:
                 print("fresh_image is None.")
                 continue
+
+            print("Progress.")
 
             # 新鮮な画像が取れたら顔検出する。
             enable_expand_roi = True
@@ -129,7 +137,11 @@ class FaceDetServer(object):
                         size_of_bbox_list = len(bbox_list_bytes)
                         constant_sized_header = struct.pack(
                             ">L", size_of_bbox_list)  # ビックエンディアンで 4byte のサイズ変数を作る
+                        print("send1", len(bbox_list_bytes))
                         self.client_socket_for_vis.sendall(
+                            constant_sized_header + bbox_list_bytes)
+                        print("send2", len(bbox_list_bytes))
+                        self.client_socket_for_vis2.sendall(
                             constant_sized_header + bbox_list_bytes)
                     else:
                         print("result.detections is Nothing.")
@@ -142,12 +154,13 @@ class FaceDetServer(object):
 
         # 止めるときはキルするので下記は実行されない。
         self.client_socket_for_vis.close()
+    
 
     def execute(self):
         th_for_cam = threading.Thread(target=self.__update_cam_image)
         th_for_cam.start()
-        th_for_face_det = threading.Thread(target=self.__update_face_bbox_list)
-        th_for_face_det.start()
+        th_for_face_bbox = threading.Thread(target=self.__update_face_bbox_list)
+        th_for_face_bbox.start()
 
 
 if __name__ == "__main__":
