@@ -10,18 +10,22 @@ class ImagePublisherNode(Node):
     def __init__(self):
         super().__init__("image_publisher_node")
         self.publisher = self.create_publisher(Image, "image_publisher", 10)
-        self.timer = self.create_timer(1, self.on_tick)
+        self.timer = self.create_timer(0.1, self.on_tick)
         self.index = 0
-        self.image_path_list = glob(f"/home/ubuntu/KYLA_Robot/src/feature_extractor/raw_data/*")
-        self.image_path_list = sorted(self.image_path_list)
+        video = cv2.VideoCapture("/home/ubuntu/WIN_20221026_18_41_51_Pro.mp4")
+        self.image_list = list()
+        while True:
+            result, frame = video.read()
+            if not result:
+                break
+            self.image_list.append(frame)
 
     def on_tick(self):
-        curr_image_path = self.image_path_list[self.index]
-        curr_image = cv2.imread(curr_image_path)
+        curr_image = self.image_list[self.index]
         bridge = CvBridge()
         msg = bridge.cv2_to_imgmsg(curr_image, encoding="bgr8")
         self.index += 1
-        self.index %= len(self.image_path_list)
+        self.index %= len(self.image_list)
         self.publisher.publish(msg)
         self.get_logger().info(f"Publish image")
 
