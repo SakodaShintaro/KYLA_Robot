@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage
 import cv2
 from cv_bridge import CvBridge
 import sys
@@ -16,18 +16,22 @@ from face_roi_extractor import FaceExtractor  # nopep8
 class MySubscriberNode(Node):
     def __init__(self):
         super().__init__("face_extractor_node")
-        self.subscription = self.create_subscription(Image, "image_publisher", self.on_subscribe, 10)
+        self.subscription = self.create_subscription(CompressedImage, "image_publisher", self.on_subscribe, 10)
         self.publisher = self.create_publisher(FaceRegion, "face_region", 10)
         self.face_extractor_ = FaceExtractor(True)
 
     def on_subscribe(self, msg):
         bridge = CvBridge()
-        img = bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
+        img = bridge.compressed_imgmsg_to_cv2(msg)
         result = self.face_extractor_.execute(img)
         self.get_logger().info(f"Subscribe image")
         msg = FaceRegion()
-        msg.num = len(result)
-        msg.region_points = list(np.array(result).flatten())
+        if result is None:
+            msg.num = 0
+            msg.region_points = list()
+        else:
+            msg.num = len(result) if result is not None else 0
+            msg.region_points = list(np.array(result).flatten())
         self.publisher.publish(msg)
         self.get_logger().info(f"Publish msg")
 

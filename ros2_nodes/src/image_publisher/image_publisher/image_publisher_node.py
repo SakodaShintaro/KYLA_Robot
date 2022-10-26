@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage
 import cv2
 from glob import glob
 from cv_bridge import CvBridge
@@ -9,7 +9,7 @@ from cv_bridge import CvBridge
 class ImagePublisherNode(Node):
     def __init__(self):
         super().__init__("image_publisher_node")
-        self.publisher = self.create_publisher(Image, "image_publisher", 10)
+        self.publisher = self.create_publisher(CompressedImage, "image_publisher", 10)
         self.timer = self.create_timer(0.1, self.on_tick)
         self.index = 0
         video = cv2.VideoCapture("/home/ubuntu/WIN_20221026_18_41_51_Pro.mp4")
@@ -23,7 +23,7 @@ class ImagePublisherNode(Node):
     def on_tick(self):
         curr_image = self.image_list[self.index]
         bridge = CvBridge()
-        msg = bridge.cv2_to_imgmsg(curr_image, encoding="bgr8")
+        msg = bridge.cv2_to_compressed_imgmsg(curr_image)
         self.index += 1
         self.index %= len(self.image_list)
         self.publisher.publish(msg)

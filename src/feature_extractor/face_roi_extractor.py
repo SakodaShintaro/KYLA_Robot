@@ -20,6 +20,9 @@ class FaceExtractor:
         results = self.face_defector_.process(
             cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
+        if results.detections is None:
+            return None
+
         result = list()
 
         image_rows, image_cols, _ = image.shape
