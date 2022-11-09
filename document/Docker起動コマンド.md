@@ -16,3 +16,7 @@ pipを入れる
 sudo apt install python3-pip
 pip3 install -r requirements.txt
 ```
+
+```bash
+sudo apt install xterm -y
+```
