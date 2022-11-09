@@ -10,12 +10,11 @@ from face_region_msg.msg import FaceRegion
 
 class OverlayNode(Node):
     def __init__(self):
-        super().__init__("image_publisher_node")
+        super().__init__("overlay_node")
         self.publisher = self.create_publisher(CompressedImage, "overlay_publisher", 10)
         self.timer = self.create_timer(0.1, self.on_tick)
         self.subscription = self.create_subscription(CompressedImage, "image_publisher", self.on_subscribe_image, 10)
         self.subscription = self.create_subscription(FaceRegion, "face_region", self.on_subscribe_region, 10)
-        self.publisher = self.create_publisher(CompressedImage, "overlay_image", 10)
         self.image_list_ = list()
         self.region_list_ = list()
 
