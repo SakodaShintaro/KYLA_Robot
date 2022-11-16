@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from email.contentmanager import raw_data_manager
 import cv2
 import socket
 import struct
@@ -11,8 +12,8 @@ import torchvision
 from PIL import Image
 from iresnet import iresnet100
 import numpy as np
-
 from PIL import Image
+import sqlite3
 
 
 class FaceReIDServer(object):
@@ -56,6 +57,26 @@ class FaceReIDServer(object):
             map_location=self.device))
         # --- IResNet config
 
+        # sqltie3 ---
+        dbname = 'FACE_FEATURES.db'
+        conn = sqlite3.connect(dbname)
+        cur = conn.cursor()
+
+        # terminalで実行したSQL文と同じようにexecute()に書く
+        cur.execute('SELECT * FROM persons')
+        raw_registered_table_data = cur.fetchall()
+        # バイナリから元の情報へ戻す。
+        self.registered_table_data = list()
+        for tuple_data in raw_registered_table_data:
+            register_id, name, face_feature_bytes = tuple_data
+            # print(name)
+            face_feature = np.frombuffer(face_feature_bytes, dtype=np.float)
+            self.registered_table_data.append((register_id, name, face_feature))
+
+        # print(self.registered_table_data)
+        # self.registered_table_data = cur.fetchall()
+        # --- sqltie3
+
     def __cv2pil(self, image):
         ''' OpenCV型 -> PIL型 
         Comments:
@@ -96,6 +117,24 @@ class FaceReIDServer(object):
 
         # print(feat_list[0].shape)
         return ret_processed_feat
+
+    def __cos_sim(self, v1, v2):
+        return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+
+    def __execute_face_recognition(self, curr_face_feature):
+        """全探索で顔特徴 DB の中を探索し、入力した特徴と一致するかを確認する。
+        """
+        recognzed_name = None
+        for tuple_data in self.registered_table_data:
+            register_id, name, face_feature = tuple_data
+            similarity = self.__cos_sim(curr_face_feature, face_feature)
+            if similarity >= 0.5:
+                recognzed_name = name
+
+        if recognzed_name is not None: 
+            print("This face is {}!!".format(recognzed_name))
+        else:
+            print("")
 
     def __update_cam_image(self):
         conn_for_cam, addr = self.vis_socket_for_receiving_cam_image.accept()
@@ -181,8 +220,10 @@ class FaceReIDServer(object):
                 # cv2.imwrite("croppted_fresh_image.png", croppted_fresh_image)
                 cropped_image_list.append(croppted_fresh_image)
 
-                reid_feature = self.__extract_reid_feature(croppted_fresh_image)
-                print(reid_feature)
+                face_feature = self.__extract_reid_feature(croppted_fresh_image)
+                # print(face_feature)
+                self.__execute_face_recognition(face_feature)
+
 
             size_of_cropped_image_list = len(cropped_image_list)
             # print("{}: {}".format(size_of_frame))
