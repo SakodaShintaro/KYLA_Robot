@@ -11,12 +11,13 @@ from face_region_msg.msg import FaceRegion
 class FaceIdentifierNode(Node):
     def __init__(self):
         super().__init__("face_identifier_node")
-        self.publisher = self.create_publisher(CompressedImage, "face_identifier_publisher", 10)
+        # self.publisher = self.create_publisher(CompressedImage, "face_identifier_publisher", 10)
         self.timer = self.create_timer(0.1, self.on_tick)
         self.subscription = self.create_subscription(CompressedImage, "image_publisher", self.on_subscribe_image, 10)
         self.subscription = self.create_subscription(FaceRegion, "face_region", self.on_subscribe_region, 10)
         self.image_list_ = list()
         self.region_list_ = list()
+        self.get_logger().info(f"finish init")
 
     def on_tick(self):
         self.get_logger().info(f"Image : {len(self.image_list_)}, Regions : {len(self.region_list_)}")
@@ -38,9 +39,9 @@ class FaceIdentifierNode(Node):
             rdy = int(rect[3] * image_height)
             cv2.rectangle(curr_image, (lux, luy), (rdx, rdy), color=(0, 0, 255))
             image_list.append(curr_image[lux:rdx, luy:rdy])
-        
+
         print(len(image_list))
-        feature = infer(image_list)
+        feature = self.infer(image_list)
         print(feature)
 
         # bridge = CvBridge()
@@ -57,7 +58,7 @@ class FaceIdentifierNode(Node):
         self.region_list_.append(msg)
 
     def infer(self, img_list):
-        return np.ones((len(img_list, 3, 3)))
+        return np.ones((len(img_list), 3, 3))
 
 
 def main(args=None):
