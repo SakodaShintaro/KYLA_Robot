@@ -39,11 +39,7 @@ ros2 run hello hello_node
 ros2 run rqt_image_view rqt_image_view
 ```
 
-## 導入したPythonパッケージ
+## launchで実行
 ```bash
-pip3 install opencv-python
-pip3 install tqdm
-pip3 install clint
-pip3 install mediapipe
-pip3 install timm
+ros2 launch launch/main_launch.py
 ```
