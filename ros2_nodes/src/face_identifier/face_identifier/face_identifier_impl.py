@@ -6,6 +6,9 @@ from glob import glob
 from cv_bridge import CvBridge
 import numpy as np
 from face_region_msg.msg import FaceRegion
+import torch
+import torchvision
+from .iresnet import iresnet100
 
 
 class FaceIdentifierNode(Node):
@@ -17,7 +20,15 @@ class FaceIdentifierNode(Node):
         self.subscription = self.create_subscription(FaceRegion, "face_region", self.on_subscribe_region, 10)
         self.image_list_ = list()
         self.region_list_ = list()
-        self.get_logger().info(f"finish init")
+
+        # IResNet config ---
+        self.device = torch.device('cuda')
+        self.model = iresnet100(pretrained=False)
+        # ref: https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch#model-zoo
+        self.model.load_state_dict(torch.load(
+            '/home/ubuntu/KYLA_Robot/src/models/backbone.pth',
+            map_location=self.device))
+        # --- IResNet config
 
     def on_tick(self):
         self.get_logger().info(f"Image : {len(self.image_list_)}, Regions : {len(self.region_list_)}")
@@ -58,7 +69,29 @@ class FaceIdentifierNode(Node):
         self.region_list_.append(msg)
 
     def infer(self, img_list):
-        return np.ones((len(img_list), 3, 3))
+        image_np = np.array(img_list)
+        print(image_np.shape)
+
+        self.model.eval()
+        self.model.to(self.device)
+        image_tensor_list = list()
+
+        image = self.__cv2pil(image_np)
+        image = image.convert("RGB")
+        image_tensor = torchvision.transforms.functional.to_tensor(image)
+        image_tensor = torchvision.transforms.functional.resize(
+            size=(112, 112), img=image_tensor)
+        image_tensor = torch.unsqueeze(image_tensor, 0)
+        image_tensor_list.append(image_tensor)
+
+        torch_cat_image_tensor = torch.cat(image_tensor_list, 0)
+        torch_cat_image_tensor = torch_cat_image_tensor.to(self.device)
+        feat_list = self.model(torch_cat_image_tensor)
+
+        processed_feat = [elem.item() for elem in feat_list[0]]
+        ret_processed_feat = np.array(processed_feat)
+
+        return ret_processed_feat
 
 
 def main(args=None):
