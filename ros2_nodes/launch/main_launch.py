@@ -16,11 +16,6 @@ def generate_launch_description():
             prefix="xterm -e",
         ),
         Node(
-            package='overlay_node',
-            executable='overlay_node',
-            prefix="xterm -e",
-        ),
-        Node(
             package='face_identifier',
             executable='face_identifier',
             prefix="xterm -e",

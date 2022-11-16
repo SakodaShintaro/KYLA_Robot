@@ -22,6 +22,8 @@ class FaceIdentifierNode(Node):
         self.image_list_ = list()
         self.region_list_ = list()
 
+        self.list_of_feature_ = list()
+
         # IResNet config ---
         self.device = torch.device('cuda')
         self.model = iresnet100(pretrained=False)
@@ -30,6 +32,9 @@ class FaceIdentifierNode(Node):
             '/home/ubuntu/KYLA_Robot/src/models/backbone.pth',
             map_location=self.device))
         # --- IResNet config
+
+    def cos_sim(self, v1, v2):
+        return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
     def on_tick(self):
         self.get_logger().info(f"Image : {len(self.image_list_)}, Regions : {len(self.region_list_)}")
@@ -44,6 +49,8 @@ class FaceIdentifierNode(Node):
 
         self.get_logger().info(f"curr_image.shape = {curr_image.shape}")
 
+        region_list = list()
+
         image_height, image_width = curr_image.shape[0:2]
         image_list = list()
         for rect in curr_region:
@@ -56,16 +63,40 @@ class FaceIdentifierNode(Node):
             self.get_logger().info(f"lux = {lux}, luy = {luy}, rdx = {rdx}, rdy = {rdy}")
             self.get_logger().info(f"push_image.shape = {push_image.shape}")
             image_list.append(push_image)
+            region_list.append((lux, luy, rdy, rdy))
 
         self.get_logger().info(f"len(image_list) = {len(image_list)}")
 
         if len(image_list) == 0:
+            self.map_of_feature_to_id_.clear()
             return
         feature = self.infer(image_list)
         self.get_logger().info(f"len(feature) = {len(feature)}")
 
+        add_feature = list()
+
+        for i, feat in enumerate(feature):
+            max_value = -float("inf")
+            max_index = -1
+
+            for target_feat in self.list_of_feature_:
+                print(feat.shape, target_feat.shape)
+
+            if max_index != -1:
+                max_index = len(self.list_of_feature_) + len(add_feature)
+                add_feature.append(feat)
+            cv2.putText(curr_image, f"{max_index}",
+                        org=(rdx, rdy),
+                        fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                        fontScale=1.0,
+                        color=(0, 255, 0),
+                        thickness=2,
+                        lineType=cv2.LINE_4)
+
+        self.list_of_feature_ += add_feature
+
+        cv2.imwrite("qwe.png", curr_image)
         # bridge = CvBridge()
-        # cv2.imwrite("qwe.png", curr_image)
         # msg = bridge.cv2_to_compressed_imgmsg(curr_image)
         # self.publisher.publish(msg)
 
