@@ -81,7 +81,8 @@ class FaceIdentifierNode(Node):
             max_index = -1
 
             for (target_feat, target_id) in self.list_of_feature_:
-                print(feat.shape, target_feat.shape)
+                curr_value = self.cos_sim(feat, target_feat)
+                print(feat.shape, target_feat.shape, curr_value)
 
             curr_id = None
 
