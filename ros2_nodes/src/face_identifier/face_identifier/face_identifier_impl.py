@@ -69,7 +69,7 @@ class FaceIdentifierNode(Node):
         self.get_logger().info(f"len(image_list) = {len(image_list)}")
 
         if len(image_list) == 0:
-            self.map_of_feature_to_id_.clear()
+            self.list_of_feature_.clear()
             return
         feature = self.infer(image_list)
         self.get_logger().info(f"len(feature) = {len(feature)}")
