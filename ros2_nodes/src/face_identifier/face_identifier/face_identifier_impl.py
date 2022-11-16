@@ -9,6 +9,7 @@ from face_region_msg.msg import FaceRegion
 import torch
 import torchvision
 from .iresnet import iresnet100
+from PIL import Image
 
 
 class FaceIdentifierNode(Node):
@@ -41,6 +42,8 @@ class FaceIdentifierNode(Node):
         curr_region = np.array(curr_region.region_points)
         curr_region = curr_region.reshape((-1, 4))
 
+        self.get_logger().info(f"curr_image.shape = {curr_image.shape}")
+
         image_height, image_width = curr_image.shape[0:2]
         image_list = list()
         for rect in curr_region:
@@ -49,11 +52,16 @@ class FaceIdentifierNode(Node):
             rdx = int(rect[2] * image_width)
             rdy = int(rect[3] * image_height)
             cv2.rectangle(curr_image, (lux, luy), (rdx, rdy), color=(0, 0, 255))
-            image_list.append(curr_image[lux:rdx, luy:rdy])
+            push_image = curr_image[luy:rdy, lux:rdx]
+            self.get_logger().info(f"lux = {lux}, luy = {luy}, rdx = {rdx}, rdy = {rdy}")
+            self.get_logger().info(f"push_image.shape = {push_image.shape}")
+            image_list.append(push_image)
 
-        print(len(image_list))
+        self.get_logger().info(f"len(image_list) = {len(image_list)}")
+
+        if len(image_list) == 0:
+            return
         feature = self.infer(image_list)
-        print(feature)
 
         # bridge = CvBridge()
         # cv2.imwrite("qwe.png", curr_image)
@@ -69,20 +77,18 @@ class FaceIdentifierNode(Node):
         self.region_list_.append(msg)
 
     def infer(self, img_list):
-        image_np = np.array(img_list)
-        print(image_np.shape)
-
         self.model.eval()
         self.model.to(self.device)
         image_tensor_list = list()
 
-        image = self.__cv2pil(image_np)
-        image = image.convert("RGB")
-        image_tensor = torchvision.transforms.functional.to_tensor(image)
-        image_tensor = torchvision.transforms.functional.resize(
-            size=(112, 112), img=image_tensor)
-        image_tensor = torch.unsqueeze(image_tensor, 0)
-        image_tensor_list.append(image_tensor)
+        for img in img_list:
+            image = self.__cv2pil(img)
+            image = image.convert("RGB")
+            image_tensor = torchvision.transforms.functional.to_tensor(image)
+            image_tensor = torchvision.transforms.functional.resize(
+                size=(112, 112), img=image_tensor)
+            image_tensor = torch.unsqueeze(image_tensor, 0)
+            image_tensor_list.append(image_tensor)
 
         torch_cat_image_tensor = torch.cat(image_tensor_list, 0)
         torch_cat_image_tensor = torch_cat_image_tensor.to(self.device)
@@ -92,6 +98,18 @@ class FaceIdentifierNode(Node):
         ret_processed_feat = np.array(processed_feat)
 
         return ret_processed_feat
+
+    def __cv2pil(self, image):
+        ''' OpenCV型 -> PIL型 '''
+        new_image = image.copy()
+        if new_image.ndim == 2:  # モノクロ
+            pass
+        elif new_image.shape[2] == 3:  # カラー
+            new_image = new_image[:, :, ::-1]
+        elif new_image.shape[2] == 4:  # 透過
+            new_image = new_image[:, :, [2, 1, 0, 3]]
+        new_image = Image.fromarray(new_image)
+        return new_image
 
 
 def main(args=None):
