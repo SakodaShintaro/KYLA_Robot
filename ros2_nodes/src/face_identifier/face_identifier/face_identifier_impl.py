@@ -62,6 +62,7 @@ class FaceIdentifierNode(Node):
         if len(image_list) == 0:
             return
         feature = self.infer(image_list)
+        self.get_logger().info(f"len(feature) = {len(feature)}")
 
         # bridge = CvBridge()
         # cv2.imwrite("qwe.png", curr_image)
@@ -94,10 +95,12 @@ class FaceIdentifierNode(Node):
         torch_cat_image_tensor = torch_cat_image_tensor.to(self.device)
         feat_list = self.model(torch_cat_image_tensor)
 
-        processed_feat = [elem.item() for elem in feat_list[0]]
-        ret_processed_feat = np.array(processed_feat)
-
-        return ret_processed_feat
+        result = list()
+        for feat in feat_list:
+            processed_feat = [elem.item() for elem in feat]
+            ret_processed_feat = np.array(processed_feat)
+            result.append(ret_processed_feat)
+        return result
 
     def __cv2pil(self, image):
         ''' OpenCV型 -> PIL型 '''
