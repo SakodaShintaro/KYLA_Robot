@@ -23,6 +23,7 @@ class FaceIdentifierNode(Node):
         self.region_list_ = list()
 
         self.list_of_feature_ = list()
+        self.next_id_ = 0
 
         # IResNet config ---
         self.device = torch.device('cuda')
@@ -73,19 +74,25 @@ class FaceIdentifierNode(Node):
         feature = self.infer(image_list)
         self.get_logger().info(f"len(feature) = {len(feature)}")
 
-        add_feature = list()
+        next_feature_list = list()
 
         for i, feat in enumerate(feature):
             max_value = -float("inf")
             max_index = -1
 
-            for target_feat in self.list_of_feature_:
+            for (target_feat, target_id) in self.list_of_feature_:
                 print(feat.shape, target_feat.shape)
 
-            if max_index != -1:
-                max_index = len(self.list_of_feature_) + len(add_feature)
-                add_feature.append(feat)
-            cv2.putText(curr_image, f"{max_index}",
+            curr_id = None
+
+            if max_index == -1:
+                curr_id = self.next_id_
+                self.next_id_ += 1
+            else:
+                curr_id = self.list_of_feature_[max_index]
+
+            next_feature_list.append((feat, curr_id))
+            cv2.putText(curr_image, f"{curr_id}",
                         org=(rdx, rdy),
                         fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=1.0,
@@ -93,7 +100,7 @@ class FaceIdentifierNode(Node):
                         thickness=2,
                         lineType=cv2.LINE_4)
 
-        self.list_of_feature_ += add_feature
+        self.list_of_feature_ = next_feature_list
 
         cv2.imwrite("qwe.png", curr_image)
         # bridge = CvBridge()
