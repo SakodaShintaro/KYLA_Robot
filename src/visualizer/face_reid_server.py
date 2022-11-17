@@ -77,6 +77,8 @@ class FaceReIDServer(object):
         # self.registered_table_data = cur.fetchall()
         # --- sqltie3
 
+        self.th_similarity = 0.35
+
     def __cv2pil(self, image):
         ''' OpenCV型 -> PIL型 
         Comments:
@@ -129,7 +131,7 @@ class FaceReIDServer(object):
         for tuple_data in self.registered_table_data:
             register_id, name, face_feature = tuple_data
             similarity = self.__cos_sim(curr_face_feature, face_feature)
-            if similarity >= 0.5:
+            if similarity >= self.th_similarity:
                 ret_recognzed_name = name
                 recognzed_sim = similarity
 
@@ -220,10 +222,10 @@ class FaceReIDServer(object):
                 sy = bbox[1]
                 ex = bbox[2]
                 ey = bbox[3]
-                croppted_fresh_image = self.fresh_image[sy:ey, sx:ex]
-                # cv2.imwrite("croppted_fresh_image.png", croppted_fresh_image)
+                cropped_fresh_image = self.fresh_image[sy:ey, sx:ex]
+                # cv2.imwrite("cropped_fresh_image.png", cropped_fresh_image)
 
-                face_feature = self.__extract_reid_feature(croppted_fresh_image)
+                face_feature = self.__extract_reid_feature(cropped_fresh_image)
                 recognized_name = self.__execute_face_recognition(face_feature)  # 未登録なら None
                 recognized_name_list.append(recognized_name)
                 

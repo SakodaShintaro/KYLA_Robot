@@ -159,7 +159,7 @@ if __name__ == "__main__":
         ey = bbox[3]
         # print(bbox)
         cropped_image = image[sy:ey, sx:ex]
-        cv2.imwrite("croppted_fresh_image.png", cropped_image)
+        cv2.imwrite("cropped_fresh_image.png", cropped_image)
         cropped_image_list.append(cropped_image)
 
         face_feature = face_feature_register.extract_reid_feature(cropped_image)

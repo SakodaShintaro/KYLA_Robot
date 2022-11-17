@@ -86,7 +86,7 @@ class FaceDetServer(object):
                 mp_drawing = mp.solutions.drawing_utils
 
                 with mp_face_detection.FaceDetection(
-                        model_selection=1, min_detection_confidence=0.5) as face_detection:
+                        model_selection=1, min_detection_confidence=0.2) as face_detection:
                     # Convert the BGR image to RGB and process it with MediaPipe Face Detection.
                     results = face_detection.process(
                         cv2.cvtColor(self.fresh_image, cv2.COLOR_BGR2RGB))

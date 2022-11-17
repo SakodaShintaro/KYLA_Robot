@@ -158,15 +158,16 @@ class VisServer(object):
                             name_color = bbox_color
                             if tgt_text is None:
                                 tgt_text = "unknown"
-                                name_color = (0, 255, 255)
-                            cv2.putText(self.image, tgt_text,
-                                        (sx, sy - 15), 1, 2.0, name_color, thickness)
+                                name_color = (0, 0, 255)
+                            cv2.putText(self.image, tgt_text + ", id: " + str(arr_id),
+                                        (sx, sy - 15), 1, 1.8, name_color, thickness)
                         except:
                             # bbox_list と recognized_name_list の要素数が合わなかったら飛ばす。
                             pass
 
                 cv2.imshow('ImageWindow', self.image)
-                key = cv2.waitKey(1)
+                delay = 1
+                key = cv2.waitKey(delay)
                 if key == 27:
                     cv2.destroyAllWindows()
                     break
