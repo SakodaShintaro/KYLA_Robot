@@ -36,11 +36,11 @@ class FaceReIDServer(object):
             (self.host, self.port_for_receiving_bbox_from_face_det))
         self.vis_socket_for_receiving_bbox_face_det.listen(self.queue_size)
 
-        # self.port_for_sending_to_vis = 64856
-        # self.client_socket_for_vis = socket.socket(
-        #     socket.AF_INET, socket.SOCK_STREAM)
-        # self.client_socket_for_vis.connect(
-        #     (self.host, self.port_for_sending_to_vis))
+        self.port_for_sending_to_vis = 64856
+        self.client_socket_for_vis = socket.socket(
+            socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket_for_vis.connect(
+            (self.host, self.port_for_sending_to_vis))
 
         self.encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
 
@@ -124,17 +124,20 @@ class FaceReIDServer(object):
     def __execute_face_recognition(self, curr_face_feature):
         """全探索で顔特徴 DB の中を探索し、入力した特徴と一致するかを確認する。
         """
-        recognzed_name = None
+        ret_recognzed_name = None
+        recognzed_sim = None
         for tuple_data in self.registered_table_data:
             register_id, name, face_feature = tuple_data
             similarity = self.__cos_sim(curr_face_feature, face_feature)
             if similarity >= 0.5:
-                recognzed_name = name
+                ret_recognzed_name = name
+                recognzed_sim = similarity
 
-        if recognzed_name is not None: 
-            print("This face is {}!!".format(recognzed_name))
+        if ret_recognzed_name is not None: 
+            print("This face is {}!! cosine-similarity: {}.".format(ret_recognzed_name, recognzed_sim))
         else:
             print("")
+        return ret_recognzed_name
 
     def __update_cam_image(self):
         conn_for_cam, addr = self.vis_socket_for_receiving_cam_image.accept()
@@ -158,10 +161,10 @@ class FaceReIDServer(object):
             while len(data) < payload_size:
                 recv_data = conn_for_cam.recv(self.buffer_size)
                 data += recv_data
-            image_bytes = data[:payload_size]
+            data_bytes = data[:payload_size]
             data = data[payload_size:]  # 先頭位置をずらす
 
-            image = np.frombuffer(image_bytes, dtype=np.uint8)
+            image = np.frombuffer(data_bytes, dtype=np.uint8)
             image = cv2.imdecode(image, cv2.IMREAD_COLOR)
             self.fresh_image = image.copy()
 
@@ -188,15 +191,15 @@ class FaceReIDServer(object):
             while len(data) < payload_size:
                 recv_data = conn_for_face_det.recv(self.buffer_size)
                 data += recv_data
-            bbox_list_bytes = data[:payload_size]
+            data_bytes = data[:payload_size]
             data = data[payload_size:]  # 先頭位置をずらす
             self.bbox_list = pickle.loads(
-                bbox_list_bytes, fix_imports=True, encoding="bytes")
+                data_bytes, fix_imports=True, encoding="bytes")
 
         # 止めるときはキルするので下記は実行されない。
         self.vis_socket_for_face_det.close()
 
-    def __update_croppepd_img_list(self):
+    def __update_recognization(self):
         # face_det_cnt = 0
         while True:
             # 別スレッドでの画像取得が終わるまでは None なので飛ばす。
@@ -210,7 +213,8 @@ class FaceReIDServer(object):
 
             # print("Progress.")
 
-            cropped_image_list = list()
+            recognized_name_list = list()
+            
             for bbox in self.bbox_list:
                 sx = bbox[0]
                 sy = bbox[1]
@@ -218,26 +222,21 @@ class FaceReIDServer(object):
                 ey = bbox[3]
                 croppted_fresh_image = self.fresh_image[sy:ey, sx:ex]
                 # cv2.imwrite("croppted_fresh_image.png", croppted_fresh_image)
-                cropped_image_list.append(croppted_fresh_image)
 
                 face_feature = self.__extract_reid_feature(croppted_fresh_image)
-                # print(face_feature)
-                self.__execute_face_recognition(face_feature)
-
-
-            size_of_cropped_image_list = len(cropped_image_list)
-            # print("{}: {}".format(size_of_frame))
-
-            # # 決まったサイズでヘッダーをつけて、受け取り側でペイロードの大きさが分かるようにする。
-            # # ref: https://gist.github.com/kittinan/e7ecefddda5616eab2765fdb2affed1b
-            # constant_sized_header = struct.pack(">L", size_of_cropped_image_list)  # ビックエンディアンで 4byte のサイズ変数を作る
-            # cropped_image_list_bytes = pickle.dumps(cropped_image_list, 0)
-
-            # # ヘッダーをつけてバイト列を送信
-            # # self.client_socket_for_vis2.sendall(
-            # #     constant_sized_header + cropped_image_list_bytes)
-
-            # # 新鮮な画像が取れたら顔検出する。
+                recognized_name = self.__execute_face_recognition(face_feature)  # 未登録なら None
+                recognized_name_list.append(recognized_name)
+                
+            # 処理が終わったタイミングで vis_server へ送信
+            # 決まったサイズでヘッダーをつけて、受け取り側でペイロードの大きさが分かるようにする。
+            # ref: https://gist.github.com/kittinan/e7ecefddda5616eab2765fdb2affed1b
+            data_bytes = pickle.dumps(recognized_name_list, 0)
+            size_of_bbox_list = len(data_bytes)
+            constant_sized_header = struct.pack(
+                ">L", size_of_bbox_list)  # ビックエンディアンで 4byte のサイズ変数を作る
+            # print("send", len(data_bytes))
+            self.client_socket_for_vis.sendall(
+                constant_sized_header + data_bytes)
 
         # 止めるときはキルするので下記は実行されない。
         self.client_socket_for_vis.close()
@@ -248,8 +247,8 @@ class FaceReIDServer(object):
         th_for_cam.start()
         th_for_bbox = threading.Thread(target=self.__update_face_bbox_list)
         th_for_bbox.start()
-        th_for_cropped_img = threading.Thread(target=self.__update_croppepd_img_list)
-        th_for_cropped_img.start()
+        th_for_recognization = threading.Thread(target=self.__update_recognization)
+        th_for_recognization.start()
 
 
 if __name__ == "__main__":
