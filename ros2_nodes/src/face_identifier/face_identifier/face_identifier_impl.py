@@ -30,7 +30,7 @@ class FaceIdentifierNode(Node):
         self.model = iresnet100(pretrained=False)
         # ref: https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch#model-zoo
         self.model.load_state_dict(torch.load(
-            '/home/ubuntu/KYLA_Robot/src/models/backbone.pth',
+            '/home/ubuntu/KYLA_Robot/assets/models/backbone.pth',
             map_location=self.device))
         # --- IResNet config
 
