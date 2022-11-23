@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import CompressedImage
+from sensor_msgs.msg import Image, CompressedImage
 import cv2
 from glob import glob
 from cv_bridge import CvBridge
@@ -9,13 +9,13 @@ from face_region_msg.msg import FaceRegion
 import torch
 import torchvision
 from .iresnet import iresnet100
-from PIL import Image
+from PIL import Image as PImage
 
 
 class FaceIdentifierNode(Node):
     def __init__(self):
         super().__init__("face_identifier_node")
-        # self.publisher = self.create_publisher(CompressedImage, "face_identifier_publisher", 10)
+        self.publisher = self.create_publisher(Image, "face_identifier_publisher", 10)
         self.timer = self.create_timer(0.1, self.on_tick)
         self.subscription = self.create_subscription(CompressedImage, "image_publisher", self.on_subscribe_image, 10)
         self.subscription = self.create_subscription(FaceRegion, "face_region", self.on_subscribe_region, 10)
@@ -104,9 +104,10 @@ class FaceIdentifierNode(Node):
         self.list_of_feature_ = next_feature_list
 
         cv2.imwrite("qwe.png", curr_image)
-        # bridge = CvBridge()
-        # msg = bridge.cv2_to_compressed_imgmsg(curr_image)
-        # self.publisher.publish(msg)
+        bridge = CvBridge()
+        curr_image = cv2.rotate(curr_image, cv2.ROTATE_90_CLOCKWISE)
+        msg = bridge.cv2_to_imgmsg(curr_image, encoding="bgr8")
+        self.publisher.publish(msg)
 
     def on_subscribe_image(self, msg):
         bridge = CvBridge()
@@ -150,7 +151,7 @@ class FaceIdentifierNode(Node):
             new_image = new_image[:, :, ::-1]
         elif new_image.shape[2] == 4:  # 透過
             new_image = new_image[:, :, [2, 1, 0, 3]]
-        new_image = Image.fromarray(new_image)
+        new_image = PImage.fromarray(new_image)
         return new_image
 
 
