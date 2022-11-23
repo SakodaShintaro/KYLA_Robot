@@ -13,3 +13,8 @@ https://onedrive.live.com/?authkey=%21AFZjr283nwZHqbA&id=4A83B6B633B029CC%215582
 から
 
 backbone.pthをダウンロードし assets/models/ 以下に配置する
+
+#### (3) データベース準備スクリプトを叩く
+assets/database/ 以下にdbファイルを作成するスクリプトを実行
+
+TODO : 作る
