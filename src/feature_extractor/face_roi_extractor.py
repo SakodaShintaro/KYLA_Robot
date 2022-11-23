@@ -8,6 +8,10 @@ from typing import List
 
 
 class FaceExtractor:
+    """
+    Comments: 
+        共通化したい。
+    """
     def __init__(self, enable_expand_roi: bool) -> None:
         mp_face_detection = mp.solutions.face_detection
         self.face_defector_ = mp_face_detection.FaceDetection(
