@@ -103,7 +103,6 @@ class FaceIdentifierNode(Node):
 
         self.list_of_feature_ = next_feature_list
 
-        cv2.imwrite("qwe.png", curr_image)
         bridge = CvBridge()
         curr_image = cv2.rotate(curr_image, cv2.ROTATE_90_CLOCKWISE)
         msg = bridge.cv2_to_imgmsg(curr_image, encoding="bgr8")
