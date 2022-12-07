@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import torch
 import torchvision
-from PIL import Image
 from iresnet import iresnet100
 import numpy as np
+from typing import List
+import cv2
+
 
 class FaceFeatureExtractor:
     def __init__(self) -> None:
@@ -15,12 +17,9 @@ class FaceFeatureExtractor:
         self.model_.eval()
         self.model_.to(self.device_)
 
-    def execute(self, image_path_list):
-        # ref: https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch#model-zoo
+    def execute(self, image_list: List[np.array]):
         image_tensor_list = list()
-        for image_path in image_path_list:
-            image = Image.open(image_path)
-            image = image.convert("RGB")
+        for image in image_list:
             image_tensor = torchvision.transforms.functional.to_tensor(image)
             image_tensor = torchvision.transforms.functional.resize(
                 size=(112, 112), img=image_tensor)
@@ -37,3 +36,12 @@ class FaceFeatureExtractor:
             ret_processed_feat_list.append(np.array(processed_feat))
 
         return ret_processed_feat_list
+
+    def execute_from_path_list(self, image_path_list):
+        # ref: https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch#model-zoo
+        image_list = list()
+        for image_path in image_path_list:
+            image = cv2.imread(image_path)
+            image_list.append(image)
+
+        return self.execute(image_list)

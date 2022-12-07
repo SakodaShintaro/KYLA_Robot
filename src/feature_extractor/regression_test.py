@@ -15,7 +15,7 @@ def vis_arcface():
     image_path_list = sorted(glob.glob("../../assets/sample_images/kyla_members/*.jpg"))
 
     face_feature_extractor = FaceFeatureExtractor()
-    processed_feat_list = face_feature_extractor.execute(image_path_list)
+    processed_feat_list = face_feature_extractor.execute_from_path_list(image_path_list)
 
     save_dir = "vis_graph"
     os.makedirs(save_dir, exist_ok=True)
