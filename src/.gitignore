@@ -5,3 +5,4 @@ models/
 /**/*.png
 /**/*.jpg
 /**/*.jpeg
+*.egg-info/
