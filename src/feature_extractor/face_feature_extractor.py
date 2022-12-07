@@ -4,7 +4,6 @@ import torchvision
 from iresnet import iresnet100
 import numpy as np
 from typing import List
-import cv2
 
 
 class FaceFeatureExtractor:
@@ -36,12 +35,3 @@ class FaceFeatureExtractor:
             ret_processed_feat_list.append(np.array(processed_feat))
 
         return ret_processed_feat_list
-
-    def execute_from_path_list(self, image_path_list):
-        # ref: https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch#model-zoo
-        image_list = list()
-        for image_path in image_path_list:
-            image = cv2.imread(image_path)
-            image_list.append(image)
-
-        return self.execute(image_list)

@@ -5,6 +5,7 @@ from face_feature_extractor import FaceFeatureExtractor
 import glob
 import os
 import numpy as np
+import cv2
 
 
 def cos_sim(v1, v2):
@@ -13,9 +14,13 @@ def cos_sim(v1, v2):
 
 def vis_arcface():
     image_path_list = sorted(glob.glob("../../assets/sample_images/kyla_members/*.jpg"))
+    image_list = list()
+    for image_path in image_path_list:
+        image = cv2.imread(image_path)
+        image_list.append(image)
 
     face_feature_extractor = FaceFeatureExtractor()
-    processed_feat_list = face_feature_extractor.execute_from_path_list(image_path_list)
+    processed_feat_list = face_feature_extractor.execute(image_list)
 
     save_dir = "vis_graph"
     os.makedirs(save_dir, exist_ok=True)
