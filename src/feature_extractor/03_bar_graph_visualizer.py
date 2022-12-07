@@ -13,8 +13,7 @@ def cos_sim(v1, v2):
 
 
 def vis_arcface():
-    # image_path_list = glob.glob("raw_data/*.*")
-    image_path_list = glob.glob("only_face_data/*.*")
+    image_path_list = glob.glob("../../assets/sample_images/kyla_members/*.jpg")
     image_path_list.sort()
 
     # processed_feat_list = normal_feature_extractor.execute(image_path_list)

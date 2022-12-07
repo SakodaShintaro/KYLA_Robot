@@ -12,7 +12,7 @@ def execute(image_path_list):
 
     # ref: https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch#model-zoo
     model.load_state_dict(torch.load(
-        '../models/backbone.pth',
+        '../../assets/models/backbone.pth',
         map_location=device))
 
     model.eval()
