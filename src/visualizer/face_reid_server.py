@@ -53,7 +53,7 @@ class FaceReIDServer(object):
 
         # ref: https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch#model-zoo
         self.model.load_state_dict(torch.load(
-            '../models/backbone.pth',
+            '../../assets/models/backbone.pth',
             map_location=self.device))
         # --- IResNet config
 
