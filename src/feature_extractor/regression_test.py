@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+from face_roi_extractor import FaceRoiExtractor
 from face_feature_extractor import FaceFeatureExtractor
 import glob
 import os
@@ -13,15 +14,37 @@ def cos_sim(v1, v2):
 
 
 def vis_arcface():
+    # 顔領域抽出器生成
+    face_roi_extractor = FaceRoiExtractor(enable_expand_roi=True)
+
+    # 特徴量計算器生成
+    face_feature_extractor = FaceFeatureExtractor()
+
+    # 画像読み込み & 顔領域抽出
     image_path_list = sorted(glob.glob("../../assets/sample_images/kyla_members/*.jpg"))
     image_list = list()
     for image_path in image_path_list:
         image = cv2.imread(image_path)
-        image_list.append(image)
+        roi_list = face_roi_extractor.execute(image)
+        h, w, _ = image.shape
+        for roi in roi_list:
+            sx, sy, ex, ey = roi
+            sx = int(w * sx)
+            sy = int(h * sy)
+            ex = int(w * ey)
+            ey = int(h * ey)
+            image_list.append(image[sy:ey, sx:ex])
 
-    face_feature_extractor = FaceFeatureExtractor()
+    # 抽出した画像を保存
+    save_dir = "extracted_face_image"
+    os.makedirs(save_dir, exist_ok=True)
+    for i, image in enumerate(image_list):
+        cv2.imwrite(f"{save_dir}/{i:06}.png", image)
+
+    # 抽出した画像について推論
     processed_feat_list = face_feature_extractor.execute(image_list)
 
+    # 顔特徴量比較
     save_dir = "vis_graph"
     os.makedirs(save_dir, exist_ok=True)
 
