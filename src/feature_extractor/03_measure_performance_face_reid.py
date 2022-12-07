@@ -3,7 +3,7 @@ from tkinter import Image
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import normal_feature_extractor
-import arcface_feature_extractor
+import face_feature_extractor
 import glob
 import os
 import numpy as np
@@ -18,7 +18,7 @@ def vis_arcface():
     # image_path_list = glob.glob("only_face_data/*.*")
     image_path_list = glob.glob("only_face_data_kyla_members/*.*")
 
-    processed_feat_list = arcface_feature_extractor.execute(image_path_list)
+    processed_feat_list = face_feature_extractor.execute(image_path_list)
 
     # if not os.path.exists("vis_graph"):
     #     os.mkdir("vis_graph")
@@ -26,7 +26,7 @@ def vis_arcface():
     # for anchor_id in range(len(processed_feat_list)):
     for anchor_id in range(len(image_path_list)):
         image_path = image_path_list[anchor_id]
-        processed_feat_for_perf = arcface_feature_extractor.execute([image_path])
+        processed_feat_for_perf = face_feature_extractor.execute([image_path])
 
         anchor_feat = [elem.item() for elem in processed_feat_for_perf[0]]
         # anchor_image_basename = os.path.basename(image_path_list[anchor_id])

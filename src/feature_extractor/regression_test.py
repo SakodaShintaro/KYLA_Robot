@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-import arcface_feature_extractor
+import face_feature_extractor
 import glob
 import os
 import numpy as np
@@ -14,7 +14,7 @@ def cos_sim(v1, v2):
 def vis_arcface():
     image_path_list = sorted(glob.glob("../../assets/sample_images/kyla_members/*.jpg"))
 
-    processed_feat_list = arcface_feature_extractor.execute(image_path_list)
+    processed_feat_list = face_feature_extractor.execute(image_path_list)
 
     save_dir = "vis_graph"
     os.makedirs(save_dir, exist_ok=True)
