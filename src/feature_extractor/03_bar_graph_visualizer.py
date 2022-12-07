@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-import normal_feature_extractor
 import arcface_feature_extractor
 import glob
 import os
@@ -13,28 +12,21 @@ def cos_sim(v1, v2):
 
 
 def vis_arcface():
-    image_path_list = glob.glob("../../assets/sample_images/kyla_members/*.jpg")
-    image_path_list.sort()
+    image_path_list = sorted(glob.glob("../../assets/sample_images/kyla_members/*.jpg"))
 
-    # processed_feat_list = normal_feature_extractor.execute(image_path_list)
     processed_feat_list = arcface_feature_extractor.execute(image_path_list)
 
-    if not os.path.exists("vis_graph"):
-        os.mkdir("vis_graph")
+    save_dir = "vis_graph"
+    os.makedirs(save_dir, exist_ok=True)
 
     for anchor_id in range(len(processed_feat_list)):
         anchor_feat = [elem.item() for elem in processed_feat_list[anchor_id]]
-        # anchor_image_basename = os.path.basename(image_path_list[anchor_id])
-        # print("anchor:", anchor_image_basename)
 
         plot_value_list = list()
         for i in range(len(processed_feat_list)):
             processed_feat = processed_feat_list[i]
             cos_sim_value = cos_sim(np.array(anchor_feat),
                                     np.array(processed_feat))
-            # image_basename = os.path.basename(image_path_list[i])
-            # print("id-" + str(i) + ",", image_basename + ",",
-            #       cos_sim_value)
             plot_value_list.append(cos_sim_value)
 
         # FigureとAxesを作成
@@ -52,8 +44,9 @@ def vis_arcface():
         only_anchor_height = np.array(plot_value_list[anchor_id])
         ax.bar(only_anchor_left, only_anchor_height, width=0.9, align="center", color="red")
 
-        # plt.show()
-        plt.savefig("vis_graph/anchor" + str(anchor_id) + ".png")
+        plt.savefig(f"{save_dir}/anchor{anchor_id:02d}.png")
+
+    print("finish")
 
 
 if __name__ == "__main__":
