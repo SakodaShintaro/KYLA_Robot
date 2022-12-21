@@ -5,12 +5,8 @@ import cv2
 from cv_bridge import CvBridge
 import sys
 import numpy as np
-
 from face_region_msg.msg import FaceRegion
-
-# sys.path.append('../../../../src/feature_extractor/')  # nopep8
-sys.path.append('../src/feature_extractor/')  # nopep8
-from face_roi_extractor import FaceExtractor  # nopep8
+from feature_extractor import FaceRoiExtractor
 
 
 class MySubscriberNode(Node):
@@ -18,7 +14,7 @@ class MySubscriberNode(Node):
         super().__init__("face_extractor_node")
         self.subscription = self.create_subscription(CompressedImage, "image_publisher", self.on_subscribe, 10)
         self.publisher = self.create_publisher(FaceRegion, "face_region", 10)
-        self.face_extractor_ = FaceExtractor(True)
+        self.face_extractor_ = FaceRoiExtractor(True)
 
     def on_subscribe(self, msg):
         bridge = CvBridge()

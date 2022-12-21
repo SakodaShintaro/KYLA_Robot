@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import torch
 import torchvision
-from iresnet import iresnet100
+from .iresnet import iresnet100
 import numpy as np
 from typing import List
+import os
 
 
 class FaceFeatureExtractor:
@@ -11,7 +12,7 @@ class FaceFeatureExtractor:
         self.device_ = torch.device('cuda')
         self.model_ = iresnet100(pretrained=False)
         self.model_.load_state_dict(torch.load(
-            '../../assets/models/backbone.pth',
+            f'{os.path.dirname(__file__)}/../../assets/models/backbone.pth',
             map_location=self.device_))
         self.model_.eval()
         self.model_.to(self.device_)

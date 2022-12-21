@@ -21,7 +21,7 @@ def vis_arcface():
     face_feature_extractor = FaceFeatureExtractor()
 
     # 画像読み込み & 顔領域抽出
-    image_path_list = sorted(glob.glob("../../assets/sample_images/kyla_members/*.jpg"))
+    image_path_list = sorted(glob.glob("../assets/sample_images/kyla_members/*.jpg"))
     image_list = list()
     for image_path in image_path_list:
         image = cv2.imread(image_path)
