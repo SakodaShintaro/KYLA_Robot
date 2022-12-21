@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-from face_roi_extractor import FaceRoiExtractor
-from face_feature_extractor import FaceFeatureExtractor
+from feature_extractor import FaceRoiExtractor
+from feature_extractor import FaceFeatureExtractor
 import glob
 import os
 import numpy as np
