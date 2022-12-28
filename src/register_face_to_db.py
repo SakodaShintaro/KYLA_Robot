@@ -2,6 +2,8 @@ import sqlite3
 import cv2
 import argparse
 from feature_extractor import FaceRoiExtractor, FaceFeatureExtractor
+import numpy as np
+from typing import List
 
 
 def get_args():
@@ -31,6 +33,19 @@ def register_feature_into_db(tgt_name, data_bytes):
     conn.close()
 
 
+def extract_face_region(image: np.ndarray, region: List[float]) -> List[np.ndarray]:
+    H, W, _ = image.shape
+    image_list = list()
+    for bbox in region:
+        sx = int(bbox[0] * W)
+        sy = int(bbox[1] * H)
+        ex = int(bbox[2] * W)
+        ey = int(bbox[3] * H)
+        cropped_image = image[sy:ey, sx:ex]
+        image_list.append(cropped_image)
+    return image_list
+
+
 if __name__ == "__main__":
     args = get_args()
     tgt_name = args.name  # 登録者名
@@ -47,15 +62,9 @@ if __name__ == "__main__":
     # 複数人写っている画像を登録には使わないようにする
     assert len(results) == 1, "複数人が登録画像に写っています"
 
-    H, W, _ = image.shape
+    image_list = extract_face_region(image, results)
 
-    for bbox in results:
-        sx = int(bbox[0] * W)
-        sy = int(bbox[1] * H)
-        ex = int(bbox[2] * W)
-        ey = int(bbox[3] * H)
-        cropped_image = image[sy:ey, sx:ex]
-
+    for cropped_image in image_list:
         face_feature = feature_extractor.execute([cropped_image])
         face_feature = face_feature[0]  # 先頭のみを取る
         face_feature_bytes = face_feature.tobytes()
