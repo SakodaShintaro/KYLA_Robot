@@ -6,3 +6,4 @@ models/
 /**/*.jpg
 /**/*.jpeg
 *.egg-info/
+*.db
