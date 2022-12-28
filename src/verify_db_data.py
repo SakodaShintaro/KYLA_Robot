@@ -4,6 +4,7 @@ import cv2
 from feature_extractor import FaceRoiExtractor, FaceFeatureExtractor
 from register_face_to_db import extract_face_region
 from glob import glob
+import matplotlib.pyplot as plt
 
 
 def cos_sim(v1, v2):
@@ -43,6 +44,13 @@ if __name__ == "__main__":
 
         feat_list = feature_extractor.execute(compare_image_list)
 
-        for i in range(len(image_path_list)):
-            sim = cos_sim(face_feature, feat_list[i])
-            print(f"{image_path_list[i]} {sim}")
+        sim_list = [cos_sim(face_feature, f) for f in feat_list]
+
+        plt.bar([i for i in range(len(sim_list))], sim_list)
+        plt.xlabel("Image ID")
+        plt.ylabel("Similarity")
+
+        save_path = f"verify_db_{name}.png"
+        plt.savefig(save_path, bbox_inches="tight", pad_inches=0.05)
+        print(f"save to {save_path}")
+        plt.close()
