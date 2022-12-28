@@ -42,8 +42,9 @@ class FaceIdentifierNode(Node):
         if len(self.image_list_) == 0 or len(self.region_list_) == 0:
             return
 
-        curr_image = self.image_list_.pop()
-        curr_region = self.region_list_.pop()
+        # TODO: 計算量的に悪くないか確認する
+        curr_image = self.image_list_.pop(0)
+        curr_region = self.region_list_.pop(0)
 
         curr_region = np.array(curr_region.region_points)
         curr_region = curr_region.reshape((-1, 4))
