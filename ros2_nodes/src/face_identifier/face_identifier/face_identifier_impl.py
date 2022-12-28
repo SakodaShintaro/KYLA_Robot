@@ -65,7 +65,7 @@ class FaceIdentifierNode(Node):
             self.get_logger().info(f"lux = {lux}, luy = {luy}, rdx = {rdx}, rdy = {rdy}")
             self.get_logger().info(f"push_image.shape = {push_image.shape}")
             image_list.append(push_image)
-            region_list.append((lux, luy, rdy, rdy))
+            region_list.append((lux, luy, rdx, rdy))
 
         self.get_logger().info(f"len(image_list) = {len(image_list)}")
 
@@ -94,6 +94,7 @@ class FaceIdentifierNode(Node):
                 curr_id = self.list_of_feature_[max_index]
 
             next_feature_list.append((feat, curr_id))
+            lux, luy, rdx, rdy = region_list[i]
             cv2.putText(curr_image, f"{curr_id}",
                         org=(rdx, rdy),
                         fontFace=cv2.FONT_HERSHEY_SIMPLEX,
