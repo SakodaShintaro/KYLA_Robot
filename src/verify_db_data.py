@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 from feature_extractor import FaceRoiExtractor, FaceFeatureExtractor
 from register_face_to_db import extract_face_region
+from glob import glob
 
 
 def cos_sim(v1, v2):
@@ -30,18 +31,18 @@ if __name__ == "__main__":
         print(name)
         face_feature = np.frombuffer(face_feature_bytes, dtype=np.float)
 
-        image_path0 = f"../assets/sample_images/kyla_members/{name}0.jpg"
-        image0 = cv2.imread(image_path0)
-        image_path1 = f"../assets/sample_images/kyla_members/{name}1.jpg"
-        image1 = cv2.imread(image_path1)
+        image_path_list = sorted(glob(f"../assets/sample_images/kyla_members/*.jpg"))
 
-        regions0 = roi_extractor.execute(image0)
-        regions1 = roi_extractor.execute(image1)
+        compare_image_list = list()
 
-        image_list0 = extract_face_region(image0, regions0)
-        image_list1 = extract_face_region(image1, regions1)
+        for image_path in image_path_list:
+            image = cv2.imread(image_path)
+            regions = roi_extractor.execute(image)
+            image_list = extract_face_region(image, regions)
+            compare_image_list.append(image_list[0])
 
-        feat_list = feature_extractor.execute([image_list0[0], image_list1[0]])
-        sim0 = cos_sim(face_feature, feat_list[0])
-        sim1 = cos_sim(face_feature, feat_list[1])
-        print(f"{sim0}, {sim1}")
+        feat_list = feature_extractor.execute(compare_image_list)
+
+        for i in range(len(image_path_list)):
+            sim = cos_sim(face_feature, feat_list[i])
+            print(f"{image_path_list[i]} {sim}")
