@@ -1,16 +1,8 @@
 import sqlite3
 import cv2
-import argparse
 from feature_extractor import FaceRoiExtractor, FaceFeatureExtractor
 import numpy as np
 from typing import List
-
-
-def get_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("name", type=str)
-    parser.add_argument("image_path", type=str)
-    return parser.parse_args()
 
 
 def register_feature_into_db(tgt_name, data_bytes):
@@ -47,25 +39,32 @@ def extract_face_region(image: np.ndarray, region: List[float]) -> List[np.ndarr
 
 
 if __name__ == "__main__":
-    args = get_args()
-    tgt_name = args.name  # 登録者名
-    tgt_image_path = args.image_path  # 登録画像（顔画像を含む）
+    name_list = ["hiraike", "kaibara", "kakitsuka", "saito"]
+
+    root_path = f"../assets/sample_images/kyla_members/"
 
     # 顔領域抽出器
     roi_extractor = FaceRoiExtractor(True)
-    image = cv2.imread(tgt_image_path)
-    results = roi_extractor.execute(image)
 
     # 顔の表現推論器
     feature_extractor = FaceFeatureExtractor()
 
-    # 複数人写っている画像を登録には使わないようにする
-    assert len(results) == 1, "複数人が登録画像に写っています"
+    for name in name_list:
+        # 登録画像へのパス
+        image_path = f"{root_path}/{name}0.jpg"
 
-    image_list = extract_face_region(image, results)
+        image = cv2.imread(image_path)
+        results = roi_extractor.execute(image)
 
-    for cropped_image in image_list:
-        face_feature = feature_extractor.execute([cropped_image])
-        face_feature = face_feature[0]  # 先頭のみを取る
-        face_feature_bytes = face_feature.tobytes()
-        register_feature_into_db(tgt_name, face_feature_bytes)
+        # 複数人写っている画像を登録には使わないようにする
+        assert len(results) == 1, "複数人が登録画像に写っています"
+
+        image_list = extract_face_region(image, results)
+
+        for cropped_image in image_list:
+            face_feature = feature_extractor.execute([cropped_image])
+            face_feature = face_feature[0]  # 先頭のみを取る
+            face_feature_bytes = face_feature.tobytes()
+            register_feature_into_db(name, face_feature_bytes)
+
+        print(f"register {name}")
