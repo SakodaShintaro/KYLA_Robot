@@ -24,10 +24,10 @@ class ImagePublisherNode(Node):
         curr_image = self.image_list[self.index]
         bridge = CvBridge()
         msg = bridge.cv2_to_compressed_imgmsg(curr_image)
+        self.get_logger().info(f"Publish image {self.index}")
         self.index += 1
         self.index %= len(self.image_list)
         self.publisher.publish(msg)
-        self.get_logger().info(f"Publish image")
 
 
 def main(args=None):
