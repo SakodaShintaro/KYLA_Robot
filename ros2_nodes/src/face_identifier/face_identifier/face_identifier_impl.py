@@ -66,6 +66,10 @@ class FaceIdentifierNode(Node):
         self.get_logger().info(f"len(image_list) = {len(image_list)}")
 
         if len(image_list) == 0:
+            bridge = CvBridge()
+            curr_image = cv2.rotate(curr_image, cv2.ROTATE_90_CLOCKWISE)
+            msg = bridge.cv2_to_imgmsg(curr_image, encoding="bgr8")
+            self.publisher.publish(msg)
             return
 
         result = self.face_matcher_(image_list)
