@@ -10,6 +10,7 @@ import torch
 import torchvision
 from .iresnet import iresnet100
 from PIL import Image as PImage
+from feature_extractor import FaceMatcher
 
 
 class FaceIdentifierNode(Node):
@@ -33,6 +34,8 @@ class FaceIdentifierNode(Node):
             '/home/ubuntu/KYLA_Robot/assets/models/backbone.pth',
             map_location=self.device))
         # --- IResNet config
+
+        self.face_matcher_ = FaceMatcher('/home/ubuntu/KYLA_Robot/assets/database/FACE_FEATURES.db')
 
     def cos_sim(self, v1, v2):
         return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
@@ -72,6 +75,11 @@ class FaceIdentifierNode(Node):
         if len(image_list) == 0:
             self.list_of_feature_.clear()
             return
+
+        result = self.face_matcher_(image_list)
+        for sim, name in result:
+            self.get_logger().info(f"sim = {sim:.4f}, name = {name}")
+
         feature = self.infer(image_list)
         self.get_logger().info(f"len(feature) = {len(feature)}")
 
@@ -83,7 +91,6 @@ class FaceIdentifierNode(Node):
 
             for (target_feat, target_id) in self.list_of_feature_:
                 curr_value = self.cos_sim(feat, target_feat)
-                print(feat.shape, target_feat.shape, curr_value)
 
             curr_id = None
 
@@ -95,7 +102,9 @@ class FaceIdentifierNode(Node):
 
             next_feature_list.append((feat, curr_id))
             lux, luy, rdx, rdy = region_list[i]
-            cv2.putText(curr_image, f"{curr_id}",
+            sim = result[i][0]
+            name = result[i][1] if sim > 0.3 else "unknown" 
+            cv2.putText(curr_image, f"{name}({sim:.3f})",
                         org=(rdx, rdy),
                         fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=1.0,
