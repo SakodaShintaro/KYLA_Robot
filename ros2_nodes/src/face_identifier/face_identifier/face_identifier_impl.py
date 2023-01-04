@@ -72,13 +72,16 @@ class FaceIdentifierNode(Node):
         for i in range(len(region_list)):
             lux, luy, rdx, rdy = region_list[i]
             sim = result[i][0]
-            name = result[i][1] if sim > 0.3 else "unknown" 
+            unknown = sim <= 0.3
+            name = "unknown" if unknown else result[i][1]
+            color = (0, 0, 255) if unknown else (0, 255, 0)
+
             self.get_logger().info(f"sim = {sim:.4f}, name = {name}")
             cv2.putText(curr_image, f"{name}({sim:.3f})",
                         org=(rdx, rdy),
                         fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=1.0,
-                        color=(0, 255, 0),
+                        color=color,
                         thickness=2,
                         lineType=cv2.LINE_4)
 
