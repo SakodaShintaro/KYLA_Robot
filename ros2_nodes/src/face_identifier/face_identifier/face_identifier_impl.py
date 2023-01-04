@@ -2,7 +2,6 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image, CompressedImage
 import cv2
-from glob import glob
 from cv_bridge import CvBridge
 import numpy as np
 from face_region_msg.msg import FaceRegion
@@ -36,9 +35,6 @@ class FaceIdentifierNode(Node):
         # --- IResNet config
 
         self.face_matcher_ = FaceMatcher('/home/ubuntu/KYLA_Robot/assets/database/FACE_FEATURES.db')
-
-    def cos_sim(self, v1, v2):
-        return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
     def on_tick(self):
         self.get_logger().info(f"Image : {len(self.image_list_)}, Regions : {len(self.region_list_)}")
@@ -88,9 +84,6 @@ class FaceIdentifierNode(Node):
         for i, feat in enumerate(feature):
             max_value = -float("inf")
             max_index = -1
-
-            for (target_feat, target_id) in self.list_of_feature_:
-                curr_value = self.cos_sim(feat, target_feat)
 
             curr_id = None
 
