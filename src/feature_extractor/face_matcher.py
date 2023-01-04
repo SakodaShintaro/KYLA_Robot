@@ -10,7 +10,7 @@ from .face_roi_extractor import FaceRoiExtractor
 
 
 class FaceMatcher:
-    def __init__(self, dbname: str) -> None:
+    def __init__(self, db_path: str) -> None:
         # 顔領域抽出器
         self.roi_extractor = FaceRoiExtractor(True)
 
@@ -18,7 +18,7 @@ class FaceMatcher:
         self.feature_extractor = FaceFeatureExtractor()
 
         # DBの準備
-        conn = sqlite3.connect(dbname)
+        conn = sqlite3.connect(db_path)
         cur = conn.cursor()
         cur.execute('SELECT * FROM persons')
         self.raw_registered_table_data = cur.fetchall()

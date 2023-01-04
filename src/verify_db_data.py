@@ -6,8 +6,8 @@ from glob import glob
 
 if __name__ == "__main__":
     # 顔一致器
-    dbname = 'FACE_FEATURES.db'
-    face_matcher = FaceMatcher(dbname)
+    db_path = f"../assets/database/FACE_FEATURES.db"
+    face_matcher = FaceMatcher(db_path)
 
     # 顔領域抽出器
     roi_extractor = FaceRoiExtractor(True)

@@ -5,9 +5,8 @@ import numpy as np
 from typing import List
 
 
-def register_feature_into_db(tgt_name, data_bytes):
-    dbname = 'FACE_FEATURES.db'
-    conn = sqlite3.connect(dbname)
+def register_feature_into_db(db_path: str, tgt_name: str, data_bytes: bytes) -> None:
+    conn = sqlite3.connect(db_path)
     cur = conn.cursor()
 
     try:
@@ -42,6 +41,7 @@ if __name__ == "__main__":
     name_list = ["hiraike", "kaibara", "kakitsuka", "saito"]
 
     root_path = f"../assets/sample_images/kyla_members/"
+    db_path = f"../assets/database/FACE_FEATURES.db"
 
     # 顔領域抽出器
     roi_extractor = FaceRoiExtractor(True)
@@ -65,6 +65,6 @@ if __name__ == "__main__":
             face_feature = feature_extractor.execute([cropped_image])
             face_feature = face_feature[0]  # 先頭のみを取る
             face_feature_bytes = face_feature.tobytes()
-            register_feature_into_db(name, face_feature_bytes)
+            register_feature_into_db(db_path, name, face_feature_bytes)
 
         print(f"register {name}")
