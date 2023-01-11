@@ -28,11 +28,12 @@ class FaceFeatureExtractor:
 
         torch_cat_image_tensor = torch.cat(image_tensor_list, 0)
         torch_cat_image_tensor = torch_cat_image_tensor.to(self.device_)
-        feat_list = self.model_(torch_cat_image_tensor)
+        with torch.no_grad():
+            feat_list = self.model_(torch_cat_image_tensor)
 
-        ret_processed_feat_list = list()
-        for i in range(len(feat_list)):
-            processed_feat = [elem.item() for elem in feat_list[i]]
-            ret_processed_feat_list.append(np.array(processed_feat))
+            ret_processed_feat_list = list()
+            for i in range(len(feat_list)):
+                processed_feat = [elem.item() for elem in feat_list[i]]
+                ret_processed_feat_list.append(np.array(processed_feat))
 
-        return ret_processed_feat_list
+            return ret_processed_feat_list
