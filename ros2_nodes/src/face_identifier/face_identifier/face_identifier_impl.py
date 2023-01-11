@@ -5,10 +5,6 @@ import cv2
 from cv_bridge import CvBridge
 import numpy as np
 from face_region_msg.msg import FaceRegion
-import torch
-import torchvision
-from .iresnet import iresnet100
-from PIL import Image as PImage
 from feature_extractor import FaceMatcher
 
 
@@ -21,16 +17,6 @@ class FaceIdentifierNode(Node):
         self.subscription = self.create_subscription(FaceRegion, "face_region", self.on_subscribe_region, 10)
         self.image_list_ = list()
         self.region_list_ = list()
-
-        # IResNet config ---
-        self.device = torch.device('cuda')
-        self.model = iresnet100(pretrained=False)
-        # ref: https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch#model-zoo
-        self.model.load_state_dict(torch.load(
-            '/home/ubuntu/KYLA_Robot/assets/models/backbone.pth',
-            map_location=self.device))
-        # --- IResNet config
-
         self.face_matcher_ = FaceMatcher('/home/ubuntu/KYLA_Robot/assets/database/FACE_FEATURES.db')
 
     def on_tick(self):
