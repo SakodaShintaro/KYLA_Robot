@@ -1,10 +1,14 @@
-ソースコード置き場
+## feature_extractorを階層位置によらず使えるようにする
+```bash
+pip3 install -e .
+```
 
-## 手順
+## 顔検出・顔認識のテスト
+```bash
+python3 regression_test.py
+```
 
-#### (1) モデルファイルをダウンロード
-https://onedrive.live.com/?authkey=%21AFZjr283nwZHqbA&id=4A83B6B633B029CC%215582&cid=4A83B6B633B029CC
-
-からbackbone.pthをダウンロードし
-
-src/models/以下に配置する
+## データベースの作成とテスト
+```bash
+./make_face_db.sh
+```

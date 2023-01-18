@@ -32,9 +32,9 @@ class FaceDetServer(object):
             (self.host, self.port_for_sending_to_vis))
 
         self.port_for_sending_bbox_list_to_reid = 64855
-        self.client_socket_for_vis2 = socket.socket(
+        self.client_socket_for_reid = socket.socket(
             socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket_for_vis2.connect(
+        self.client_socket_for_reid.connect(
             (self.host, self.port_for_sending_bbox_list_to_reid))
 
         print('Setting Sockets')
@@ -74,10 +74,10 @@ class FaceDetServer(object):
         while True:
             # 別スレッドでの画像取得が終わるまでは None なので飛ばす。
             if self.fresh_image is None:
-                print("fresh_image is None.")
+                # print("fresh_image is None.")
                 continue
 
-            print("Progress.")
+            # print("Progress.")
 
             # 新鮮な画像が取れたら顔検出する。
             enable_expand_roi = True
@@ -86,7 +86,7 @@ class FaceDetServer(object):
                 mp_drawing = mp.solutions.drawing_utils
 
                 with mp_face_detection.FaceDetection(
-                        model_selection=1, min_detection_confidence=0.5) as face_detection:
+                        model_selection=1, min_detection_confidence=0.2) as face_detection:
                     # Convert the BGR image to RGB and process it with MediaPipe Face Detection.
                     results = face_detection.process(
                         cv2.cvtColor(self.fresh_image, cv2.COLOR_BGR2RGB))
@@ -137,11 +137,11 @@ class FaceDetServer(object):
                         size_of_bbox_list = len(bbox_list_bytes)
                         constant_sized_header = struct.pack(
                             ">L", size_of_bbox_list)  # ビックエンディアンで 4byte のサイズ変数を作る
-                        print("send1", len(bbox_list_bytes))
+                        # print("send1", len(bbox_list_bytes))
                         self.client_socket_for_vis.sendall(
                             constant_sized_header + bbox_list_bytes)
-                        print("send2", len(bbox_list_bytes))
-                        self.client_socket_for_vis2.sendall(
+                        # print("send2", len(bbox_list_bytes))
+                        self.client_socket_for_reid.sendall(
                             constant_sized_header + bbox_list_bytes)
                     else:
                         print("result.detections is Nothing.")

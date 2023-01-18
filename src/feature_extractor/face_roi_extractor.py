@@ -7,7 +7,12 @@ import numpy as np
 from typing import List
 
 
-class FaceExtractor:
+class FaceRoiExtractor:
+    """
+    Comments:
+        共通化したい。
+    """
+
     def __init__(self, enable_expand_roi: bool) -> None:
         mp_face_detection = mp.solutions.face_detection
         self.face_defector_ = mp_face_detection.FaceDetection(
@@ -19,6 +24,9 @@ class FaceExtractor:
         # Convert the BGR image to RGB and process it with MediaPipe Face Detection.
         results = self.face_defector_.process(
             cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+
+        if results.detections is None:
+            return None
 
         result = list()
 
@@ -54,7 +62,7 @@ class FaceExtractor:
                 ex = max(0, min(image_cols, ex))
                 sy = max(0, min(image_rows, sy))
                 ey = max(0, min(image_rows, ey))
-            
+
             sx /= image_cols
             sy /= image_rows
             ex /= image_cols
@@ -69,7 +77,7 @@ if __name__ == "__main__":
     image_path_list = glob.glob("raw_data/*.*")
     image_path_list = sorted(image_path_list)
 
-    extractor = FaceExtractor(True)
+    extractor = FaceRoiExtractor(True)
 
     save_dir = "only_face_data"
     os.makedirs(save_dir, exist_ok=True)
