@@ -79,7 +79,7 @@ class FaceIdentifierNode(Node):
             color = (0, 0, 255) if unknown else (0, 255, 0)
 
             self.get_logger().info(f"sim = {sim:.4f}, name = {name}")
-            cv2.putText(curr_image, f"{name}({sim:.3f})",
+            cv2.putText(curr_image, f"{name}({sim:.3f}, {thermo_list[i]}C)",
                         org=(rdx, rdy),
                         fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=1.0,
