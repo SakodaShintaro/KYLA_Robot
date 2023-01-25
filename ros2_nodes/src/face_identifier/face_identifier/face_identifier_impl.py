@@ -34,8 +34,10 @@ class FaceIdentifierNode(Node):
         curr_region = np.array(curr_region.region_points)
         curr_region = curr_region.reshape((-1, 4))
 
+        curr_num = curr_region.shape[0]
+
         thermo_list =  self.get_thermo_list(curr_region, curr_thermo)
-        for i in range(len(thermo_list)):
+        for i in range(curr_num):
             self.get_logger().info(f"t[{i}] = {thermo_list[i]}")
 
         self.get_logger().info(f"curr_image.shape = {curr_image.shape}")
@@ -58,7 +60,7 @@ class FaceIdentifierNode(Node):
 
         self.get_logger().info(f"len(image_list) = {len(image_list)}")
 
-        if len(image_list) == 0:
+        if curr_num == 0:
             bridge = CvBridge()
             curr_image = cv2.rotate(curr_image, cv2.ROTATE_90_CLOCKWISE)
             msg = bridge.cv2_to_imgmsg(curr_image, encoding="bgr8")
@@ -66,7 +68,7 @@ class FaceIdentifierNode(Node):
             return
 
         result = self.face_matcher_(image_list)
-        for i in range(len(region_list)):
+        for i in range(curr_num):
             lux, luy, rdx, rdy = region_list[i]
             sim = result[i][0]
             unknown = sim <= 0.3
