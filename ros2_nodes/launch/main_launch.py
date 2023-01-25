@@ -11,6 +11,11 @@ def generate_launch_description():
             prefix="xterm -e",
         ),
         Node(
+            package='thermography_publisher',
+            executable='thermography_publisher_node',
+            prefix="xterm -e",
+        ),
+        Node(
             package='face_extractor',
             executable='face_extractor_node',
             prefix="xterm -e",
