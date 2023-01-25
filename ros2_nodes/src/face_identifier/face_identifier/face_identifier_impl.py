@@ -31,10 +31,20 @@ class FaceIdentifierNode(Node):
         curr_region = self.region_list_.pop(0)
         curr_thermo = self.thermo_list_.pop(0)
 
+        # 1次元配列として来るので2次元に変換
         curr_region = np.array(curr_region.region_points)
         curr_region = curr_region.reshape((-1, 4))
 
+        # 顔の数を取得
         curr_num = curr_region.shape[0]
+
+        # 検出がなければスキップ
+        if curr_num == 0:
+            bridge = CvBridge()
+            curr_image = cv2.rotate(curr_image, cv2.ROTATE_90_CLOCKWISE)
+            msg = bridge.cv2_to_imgmsg(curr_image, encoding="bgr8")
+            self.publisher.publish(msg)
+            return
 
         thermo_list =  self.get_thermo_list(curr_region, curr_thermo)
         for i in range(curr_num):
@@ -59,13 +69,6 @@ class FaceIdentifierNode(Node):
             region_list.append((lux, luy, rdx, rdy))
 
         self.get_logger().info(f"len(image_list) = {len(image_list)}")
-
-        if curr_num == 0:
-            bridge = CvBridge()
-            curr_image = cv2.rotate(curr_image, cv2.ROTATE_90_CLOCKWISE)
-            msg = bridge.cv2_to_imgmsg(curr_image, encoding="bgr8")
-            self.publisher.publish(msg)
-            return
 
         result = self.face_matcher_(image_list)
         for i in range(curr_num):
