@@ -80,7 +80,7 @@ class FaceIdentifierNode(Node):
 
             self.get_logger().info(f"sim = {sim:.4f}, name = {name}")
             cv2.putText(curr_image, f"{name}({sim:.3f}, {thermo_list[i]}C)",
-                        org=(rdx, rdy),
+                        org=(lux, rdy + 25),
                         fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=1.0,
                         color=color,
