@@ -83,6 +83,13 @@ class FaceIdentifierNode(Node):
                         org=(lux, rdy + 25),
                         fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=1.0,
+                        color=(0, 0, 0),
+                        thickness=3,
+                        lineType=cv2.LINE_4)
+            cv2.putText(curr_image, f"{name}({sim:.3f}, {thermo_list[i]}C)",
+                        org=(lux, rdy + 25),
+                        fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                        fontScale=1.0,
                         color=color,
                         thickness=2,
                         lineType=cv2.LINE_4)
