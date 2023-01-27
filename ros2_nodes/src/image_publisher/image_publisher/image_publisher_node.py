@@ -12,7 +12,7 @@ class ImagePublisherNode(Node):
         self.publisher = self.create_publisher(CompressedImage, "image_publisher", 10)
         self.timer = self.create_timer(0.1, self.on_tick)
         self.index = 0
-        video = cv2.VideoCapture("/home/ubuntu/WIN_20221026_18_41_51_Pro.mp4")
+        video = cv2.VideoCapture("/home/ubuntu/KYLA_Robot/assets/sample_movies/WIN_20221026_18_41_51_Pro.mp4")
         self.image_list = list()
         while True:
             result, frame = video.read()
