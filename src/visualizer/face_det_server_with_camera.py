@@ -61,6 +61,7 @@ class FaceDetServer(object):
     def __update_face_bbox_list(self):
         # face_det_cnt = 0
         # while True:
+        frame_id = 0
         while self.cap.isOpened():
             ret, self.fresh_image = self.cap.read()
             # print(self.fresh_image.shape)
@@ -71,6 +72,7 @@ class FaceDetServer(object):
                 if self.video_file is not None:
                     self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)  # reset
                 continue
+            frame_id += 1
 
             # 決まったサイズでヘッダーをつけて、受け取り側でペイロードの大きさが分かるようにする。
             # ref: https://gist.github.com/kittinan/e7ecefddda5616eab2765fdb2affed1b
@@ -91,6 +93,7 @@ class FaceDetServer(object):
                     # Draw face detections of each face.
                     if results.detections:
                         self.bbox_list = list()
+                        self.bbox_list.append(frame_id)
                         # roi_image = image.copy()
                         image_rows, image_cols, _ = self.fresh_image.shape
                         for detection in results.detections:

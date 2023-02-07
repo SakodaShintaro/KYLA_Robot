@@ -77,7 +77,8 @@ class FaceReIDServer(object):
         # self.registered_table_data = cur.fetchall()
         # --- sqltie3
 
-        self.th_similarity = 0.35
+        # self.th_similarity = 0.35
+        self.th_similarity = 0.4
 
     def __cv2pil(self, image):
         ''' OpenCV型 -> PIL型 
@@ -126,7 +127,7 @@ class FaceReIDServer(object):
     def __execute_face_recognition(self, curr_face_feature):
         """全探索で顔特徴 DB の中を探索し、入力した特徴と一致するかを確認する。
         """
-        ret_recognzed_name = None
+        ret_recognzed_name = "unknown"
         recognzed_sim = None
         for tuple_data in self.registered_table_data:
             register_id, name, face_feature = tuple_data
@@ -136,7 +137,7 @@ class FaceReIDServer(object):
                 recognzed_sim = similarity
 
         if ret_recognzed_name is not None: 
-            print("This face is {}!! cosine-similarity: {}.".format(ret_recognzed_name, recognzed_sim))
+            print("This face is {}, cosine-similarity: {}.".format(ret_recognzed_name, recognzed_sim))
         else:
             print("")
         return ret_recognzed_name
@@ -215,9 +216,11 @@ class FaceReIDServer(object):
 
             # print("Progress.")
 
+            frame_id = self.bbox_list[0]  # 初めの要素はフレーム ID
             recognized_name_list = list()
+            recognized_name_list.append(frame_id)
             
-            for bbox in self.bbox_list:
+            for bbox in self.bbox_list[1:]:  # 初めの要素より後は BBox の情報
                 sx = bbox[0]
                 sy = bbox[1]
                 ex = bbox[2]
