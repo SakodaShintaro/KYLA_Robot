@@ -235,67 +235,73 @@ class VisServer(object):
                     recog_frame_id = self.recognized_name_list[0]
                     for bbox_id, bbox in enumerate(self.bbox_list[1:]):
                         sx, sy, ex, ey = bbox
-                        bbox_color = (255, 255, 0)
+                        # bbox_color = (255, 255, 0)
+                        bbox_color = (0, 230, 0)
+
                         thickness = 2
                         cv2.rectangle(self.image, (sx, sy),
                                       (ex, ey), bbox_color, thickness)
-
-                        try:
-                            recog_frame_id = self.recognized_name_list[0]
-                            recog_bbox_id = None
-                            # 今見てる bbox_id と認証時の bbox_id を紐づける。
-                            tgt_track_token = "unknown"
-                            for track_token in self.track_tgt_id_dict.keys():
-                                bbox_id_series = self.track_tgt_id_dict[track_token]
-                                # 今見てる bbox_id と末尾の ID が一致するか調べる。
-                                if bbox_id == bbox_id_series[-1]:
-                                    ref_id = (bbox_frame_id - recog_frame_id) * -1
+                        tgt_text = "unknown"
+                        tgt_track_token = "unknown"
+                        name_color = (0, 0, 255)
+                        if len_recog_name_list > 1:
+                            try:
+                                recog_frame_id = self.recognized_name_list[0]
+                                recog_bbox_id = None
+                                # 今見てる bbox_id と認証時の bbox_id を紐づける。
+                                for track_token in self.track_tgt_id_dict.keys():
+                                    bbox_id_series = self.track_tgt_id_dict[track_token]
+                                    # 今見てる bbox_id と末尾の ID が一致するか調べる。
+                                    if bbox_id == bbox_id_series[-1]:
+                                        ref_id = (bbox_frame_id - recog_frame_id) * -1
+                                        try:
+                                            recog_bbox_id = bbox_id_series[ref_id - 1]  # 末尾が最新フレームなので、フレーム ID の差分から参照する。
+                                        except:
+                                            pass
+                                        tgt_track_token = track_token
+                                        break
+                                if tgt_track_token == "unknown":
+                                    continue
+                                if recog_bbox_id is not None:
                                     try:
-                                        recog_bbox_id = bbox_id_series[ref_id - 1]  # 末尾が最新フレームなので、フレーム ID の差分から参照する。
+                                        tgt_text = self.recognized_name_list[recog_bbox_id + 1]  # 先頭要素はフレーム ID なので１ずらして参照する。
                                     except:
                                         pass
-                                    tgt_track_token = track_token
-                                    break
-                            if tgt_track_token == "unknown":
-                                continue
-                            tgt_text = "unknown"
-                            if recog_bbox_id is not None:
-                                try:
-                                    tgt_text = self.recognized_name_list[recog_bbox_id + 1]  # 先頭要素はフレーム ID なので１ずらして参照する。
-                                except:
-                                    pass
 
-                            max_cnt = 0
-                            self.track_tgt_name_dict[tgt_track_token].append(tgt_text)
+                                max_cnt = 0
+                                self.track_tgt_name_dict[tgt_track_token].append(tgt_text)
 
-                            bbox_name_series = self.track_tgt_name_dict[track_token]   # 統計処理で使う
-                            num_bbox_name_elems = len(bbox_name_series)
-                            if num_bbox_name_elems > self.limit_buffer:
-                                bbox_name_series.pop(0)
+                                bbox_name_series = self.track_tgt_name_dict[track_token]   # 統計処理で使う
+                                num_bbox_name_elems = len(bbox_name_series)
+                                if num_bbox_name_elems > self.limit_buffer:
+                                    bbox_name_series.pop(0)
 
-                            track_tgt_name_set = list(set(self.track_tgt_name_dict[tgt_track_token]))
+                                track_tgt_name_set = list(set(self.track_tgt_name_dict[tgt_track_token]))
 
-                            # ある程度バッファに情報がたまっているなら統計処理を行う。
-                            # ある程度たまっていないと誤検知が起こる。
-                            if num_bbox_name_elems > self.limit_buffer / 2:
-                                for tgt_name in track_tgt_name_set:
-                                    if tgt_name is None:
-                                        continue
-                                    cnt = self.track_tgt_name_dict[tgt_track_token].count(tgt_name)
-                                    if max_cnt < cnt:
-                                        max_cnt = cnt
-                                        tgt_text = tgt_name
+                                # ある程度バッファに情報がたまっているなら統計処理を行う。
+                                # ある程度たまっていないと誤検知が起こる。
+                                if num_bbox_name_elems > self.limit_buffer / 2:
+                                    for tgt_name in track_tgt_name_set:
+                                        if tgt_name is None:
+                                            continue
+                                        cnt = self.track_tgt_name_dict[tgt_track_token].count(tgt_name)
+                                        if max_cnt < cnt:
+                                            max_cnt = cnt
+                                            tgt_text = tgt_name
 
-                            if tgt_text == "unknown":
-                                name_color = (0, 0, 255)
-                            else:
-                                name_color = bbox_color
+                                if tgt_text != "unknown":
+                                    name_color = bbox_color
+
+                                cv2.putText(self.image, tgt_text + ", id: " + str(bbox_id) + ", " + tgt_track_token,
+                                            (sx, sy - 15), 1, 1.5, name_color, thickness)
+                            except:
+                                print(recog_frame_id, bbox_frame_id)
+                                traceback.print_exc()
+                                pass
+                        else:
                             cv2.putText(self.image, tgt_text + ", id: " + str(bbox_id) + ", " + tgt_track_token,
                                         (sx, sy - 15), 1, 1.5, name_color, thickness)
-                        except:
-                            print(recog_frame_id, bbox_frame_id)
-                            traceback.print_exc()
-                            pass
+
 
                 cv2.imshow('ImageWindow', self.image)
                 delay = 1
