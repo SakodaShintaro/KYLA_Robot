@@ -216,7 +216,11 @@ class FaceReIDServer(object):
 
             # print("Progress.")
 
-            frame_id = self.bbox_list[0]  # 初めの要素はフレーム ID
+            try:
+                frame_id = self.bbox_list[0]  # 初めの要素はフレーム ID
+            except:
+                continue
+
             recognized_name_list = list()
             recognized_name_list.append(frame_id)
             

@@ -44,7 +44,7 @@ class VisServer(object):
 
         self.track_tgt_id_dict = dict()
         self.track_tgt_name_dict = dict()
-        self.limit_buffer = 20
+        self.limit_buffer = 30
         self.cnt_tracks = 0
 
         print('Setting Sockets')
@@ -181,6 +181,8 @@ class VisServer(object):
                     new_bbox_id_series.append(bbox_id)
 
                     self.track_tgt_name_dict[new_track_token] = list()
+
+            # トラッキング処理が終わった後に可視化をしたい。そうしないと処理結果がずれておかしな結果になったりする？
                 
         # 止めるときはキルするので下記は実行されない。
         self.vis_socket_for_face_det.close()
@@ -253,16 +255,23 @@ class VisServer(object):
                                     bbox_id_series = self.track_tgt_id_dict[track_token]
                                     # 今見てる bbox_id と末尾の ID が一致するか調べる。
                                     if bbox_id == bbox_id_series[-1]:
-                                        ref_id = (bbox_frame_id - recog_frame_id) * -1
+                                        diff_id = (bbox_frame_id - recog_frame_id) * -1
+                                        # 配列外参照を防ぐために try-except を使う。（別の方法で書きたい）
                                         try:
-                                            recog_bbox_id = bbox_id_series[ref_id - 1]  # 末尾が最新フレームなので、フレーム ID の差分から参照する。
+                                            # 末尾が最新フレームなので、フレーム ID の差分から参照する。
+                                            # -1 が末尾なので、そこを基準とするために -1 を足している。
+                                            recog_bbox_id = bbox_id_series[diff_id - 1]
                                         except:
                                             pass
                                         tgt_track_token = track_token
                                         break
+
+                                # "trackX" 以外の名前はないため飛ばす。
                                 if tgt_track_token == "unknown":
                                     continue
+                                
                                 if recog_bbox_id is not None:
+                                    # 配列外参照を防ぐために try-except を使う。（別の方法で書きたい）
                                     try:
                                         tgt_text = self.recognized_name_list[recog_bbox_id + 1]  # 先頭要素はフレーム ID なので１ずらして参照する。
                                     except:
@@ -272,15 +281,15 @@ class VisServer(object):
                                 self.track_tgt_name_dict[tgt_track_token].append(tgt_text)
 
                                 bbox_name_series = self.track_tgt_name_dict[track_token]   # 統計処理で使う
-                                num_bbox_name_elems = len(bbox_name_series)
-                                if num_bbox_name_elems > self.limit_buffer:
+                                track_lifetime = len(bbox_name_series)
+                                if track_lifetime > self.limit_buffer:
                                     bbox_name_series.pop(0)
 
                                 track_tgt_name_set = list(set(self.track_tgt_name_dict[tgt_track_token]))
 
                                 # ある程度バッファに情報がたまっているなら統計処理を行う。
                                 # ある程度たまっていないと誤検知が起こる。
-                                if num_bbox_name_elems > self.limit_buffer / 2:
+                                if track_lifetime >= self.limit_buffer / 2:
                                     for tgt_name in track_tgt_name_set:
                                         if tgt_name is None:
                                             continue

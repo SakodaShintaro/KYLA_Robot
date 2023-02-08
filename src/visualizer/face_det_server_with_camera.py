@@ -72,7 +72,6 @@ class FaceDetServer(object):
                 if self.video_file is not None:
                     self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)  # reset
                 continue
-            frame_id += 1
 
             # 決まったサイズでヘッダーをつけて、受け取り側でペイロードの大きさが分かるようにする。
             # ref: https://gist.github.com/kittinan/e7ecefddda5616eab2765fdb2affed1b
@@ -165,6 +164,8 @@ class FaceDetServer(object):
                 self.fresh_image = None
                 self.bbox_list = list()
                 print(e)
+
+            frame_id += 1
 
         # 止めるときはキルするので下記は実行されない。
         self.client_socket_for_vis.close()
